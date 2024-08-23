@@ -1,24 +1,21 @@
-import Menu from './components/layout/header';
-import './App.css';
-import ReactDOM from "react-dom/client";
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import Accessories from './components/Accessories';
-import Food from './components/Food';
-import Home from './components/Home';
-import Pet from './components/Pet';
+import Menu from "../src/components/layout/header";
+import "./App.css";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import Home from "../src/components/UI/Home.jsx"
+import Pet from "../src/components/UI/Pet.jsx";
+import Accessories from "../src/components/UI/Accessories.jsx";
+import Food from "../src/components/UI/Food.jsx";
 
 function App() {
   return (
     <div className="App">
-      <BrowserRouter>
-        <Routes>
-          <Route path='/' element={<Menu />}>
-          <Route path='Pet' element={<Pet/>}/>
-          <Route path = 'Accessories' element={<Accessories />}/>
-          <Route path='Food' element={<Food/>}/>
-          </Route>
-        </Routes>
-      </BrowserRouter>
+      <Menu />
+          <Routes>
+            <Route path="/" element={<Home/>}/>
+            <Route path="/Pet" element={<Pet />} />
+            <Route path="/Accessories" element={<Accessories />} />
+            <Route path="/Food" element={<Food />} />
+          </Routes>
     </div>
   );
 }
