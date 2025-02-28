@@ -1,11 +1,8 @@
-import { Image } from "antd";
-import "../sass/Logo.sass"
-
+import { useNavigate } from "react-router-dom";
 const Logo = ({image, ref} : {image: string, ref: string}) => {
+  const navigate = useNavigate()
   return (
-    <a href={ref}>
-      <Image className="img-logo" src={image} preview={false} style={{width:"50%"}}/>
-    </a>
+      <img className="rounded-full border-b cursor-pointer" src={image} width={50} onClick={()=>navigate("/")}/>
   );
 };
 
