@@ -1,8 +1,9 @@
 import axios from "axios";
 
 const authorizedAxiosInstance = axios.create({
-  baseURL: process.env.REACT_APP_BACKEND,
+  baseURL: import.meta.env.VITE_BACKEND_URL,
 });
+
 
 authorizedAxiosInstance.interceptors.request.use(
   function (config: any) {

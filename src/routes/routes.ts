@@ -28,9 +28,9 @@ export const routes : Route[]=[
     { path: "/admin", element: dashboardAdminPage, isShowHeader: false, isAdmin: true},
 
     //auth
-    { path: "/account/login", element: loginPage, isShowHeader: false, isAdmin: false},
-    { path: "/account/register", element: registerPage, isShowHeader: false, isAdmin: false},
-    { path: "/account/forgot-pass", element: forgotPasswordPage, isShowHeader: false, isAdmin: false},
+    { path: "/auth/login", element: loginPage, isShowHeader: false, isAdmin: false},
+    { path: "/auth/register", element: registerPage, isShowHeader: false, isAdmin: false},
+    { path: "/auth/forgot-pass", element: forgotPasswordPage, isShowHeader: false, isAdmin: false},
 
     //Not found page
     { path: "*", element: notFoundPage, isShowHeader: false, isAdmin: false}
