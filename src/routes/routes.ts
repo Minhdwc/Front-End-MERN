@@ -1,6 +1,6 @@
 import React from 'react'
 //Page not found
-const notFoundPage = React.lazy(()=>import('../pages/notFoundPage/notFoundPage'))
+const notFoundPage = React.lazy(()=>import('@/pages/notFoundPage/notFoundPage'))
 
 //Page of authentication
 const loginPage = React.lazy(()=>import('../pages/auth/login'))
