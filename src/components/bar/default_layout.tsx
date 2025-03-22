@@ -1,8 +1,9 @@
 import React from "react";
 import { Layout } from "antd";
+import { Container } from "@mui/material";
 import HeaderComponent from "../layouts/Header/header";
 import FooterComponent from "../layouts/Footer/Footer";
-import Sidebar from "../UI/Sidebar";
+import Sidebar from "../UI/Sidebar/Sidebar";
 
 const DefaultLayout: React.FC<{ children: React.ReactNode }> = ({
   children,
@@ -12,7 +13,9 @@ const DefaultLayout: React.FC<{ children: React.ReactNode }> = ({
       <Layout.Header>
         <HeaderComponent />
       </Layout.Header>
-      <Layout.Content>{children}</Layout.Content>
+      <Layout.Content>
+        <Container>{children}</Container>
+      </Layout.Content>
       <Layout.Footer>
         <FooterComponent />
       </Layout.Footer>

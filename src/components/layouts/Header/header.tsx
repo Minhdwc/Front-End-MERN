@@ -5,21 +5,20 @@ import {
   IconButton,
   Menu,
   MenuItem,
-  Avatar,
   Box,
   Typography,
   Tooltip,
   Container,
 } from "@mui/material";
 import { Button, Space } from "antd";
-import { FaRegUserCircle, FaSearch } from "react-icons/fa";
+import { FaSearch } from "react-icons/fa";
 import MenuIcon from "@mui/icons-material/Menu";
-import Logo from "@/components/UI/Logo";
-import AvatarComponent from "@/components/UI/Avatar";
+import Logo from "@/components/UI/Logo/Logo";
+import AvatarComponent from "@/components/UI/Avatar/Avatar";
 
 const pages: string[] = ["Products", "Pricing", "Blog"];
 
-const HeaderComponent: React.FC = () => {
+const HeaderComponent = () => {
   const [anchorElNav, setAnchorElNav] = useState<null | HTMLElement>(null);
 
   const handleOpenNavMenu = (event: React.MouseEvent<HTMLElement>) => {
