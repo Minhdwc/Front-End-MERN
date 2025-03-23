@@ -1,4 +1,4 @@
-import authorizedAxiosInstance from "~/ultils/authorAxios";
+import authorizedAxiosInstance from "@/ultils/authorAxios"
 
 export const getAllPet =()=>{
     

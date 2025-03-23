@@ -5,21 +5,21 @@ import {
   IconButton,
   Menu,
   MenuItem,
-  Avatar,
   Box,
   Typography,
   Tooltip,
   Container,
 } from "@mui/material";
-import { Button, Space } from "antd";
-import { FaRegUserCircle, FaSearch } from "react-icons/fa";
+import { Button } from "antd";
+import { FaSearch } from "react-icons/fa";
 import MenuIcon from "@mui/icons-material/Menu";
 import Logo from "@/components/UI/Logo";
 import AvatarComponent from "@/components/UI/Avatar";
+import MenuComponents from "@/components/UI/Menu/MenuComponent";
 
 const pages: string[] = ["Products", "Pricing", "Blog"];
 
-const HeaderComponent: React.FC = () => {
+const HeaderComponent = () => {
   const [anchorElNav, setAnchorElNav] = useState<null | HTMLElement>(null);
 
   const handleOpenNavMenu = (event: React.MouseEvent<HTMLElement>) => {
@@ -31,9 +31,28 @@ const HeaderComponent: React.FC = () => {
   };
 
   return (
-    <AppBar position="static">
+    <AppBar
+      position="sticky"
+      sx={{
+        backgroundColor: "#fff",
+        boxShadow: "none",
+        borderBottom: "2px solid #ff5722",
+      }}
+    >
       <Container maxWidth="xl">
-        <Toolbar>
+        <Toolbar
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+        >
+          {/* Logo */}
+          <Box sx={{ display: "flex", alignItems: "center" }}>
+            <Logo image="/logo.png" />
+          </Box>
+
+          {/* Menu cho mobile */}
           <Box sx={{ flexGrow: 1, display: { xs: "flex", md: "none" } }}>
             <IconButton
               size="large"
@@ -56,31 +75,29 @@ const HeaderComponent: React.FC = () => {
             </Menu>
           </Box>
 
-          <Logo image="/logo.png" />
-
-          <Typography
-            variant="h6"
-            noWrap
+          {/* Menu Desktop */}
+          <Box
             sx={{
-              flexGrow: 1,
               display: { xs: "none", md: "flex" },
+              flexGrow: 1,
               justifyContent: "center",
             }}
           >
-            Where Every Pet Feels at Home!
-          </Typography>
+            <MenuComponents />
+          </Box>
 
-          <Box sx={{ flexGrow: 0 }}>
-            <Space size="middle">
-              <Tooltip title="Tìm kiếm">
-                <Button
-                  shape="circle"
-                  icon={<FaSearch />}
-                  className="btn-header"
-                />
-              </Tooltip>
-              <AvatarComponent />
-            </Space>
+          {/* Search & Avatar */}
+          <Box
+            sx={{ flexGrow: 0, display: "flex", alignItems: "center", gap: 2 }}
+          >
+            <Tooltip title="Tìm kiếm">
+              <Button
+                shape="circle"
+                icon={<FaSearch />}
+                className="btn-header"
+              />
+            </Tooltip>
+            <AvatarComponent />
           </Box>
         </Toolbar>
       </Container>
