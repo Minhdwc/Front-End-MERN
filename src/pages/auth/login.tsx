@@ -1,4 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { getUsers } from "@/store/services/user/userSlice";
+import { RootState, AppDispatch } from "@/store/store";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Form, Input, message } from "antd";
@@ -23,20 +26,28 @@ interface LoginResponse {
 
 const Login = () => {
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
+  const [loadingAction, setLoadingAction] = useState(false);
+  const dispatch = useDispatch<AppDispatch>();
+  const { userInfo, loading, error } = useSelector(
+    (state: RootState) => state.user
+  );
 
   const onFinish = async (values: { email: string; password: string }) => {
-    setLoading(true);
+    setLoadingAction(true);
     try {
       const response = await authorizedAxiosInstance.post<LoginResponse>(
         "auth/login",
         values
       );
 
-      const { accessToken, user } = response.data;
+      const accessToken = response.data.data.userLogged.accessToken;
+      if (!accessToken) {
+        throw new Error("Invalid token response");
+      }
 
       localStorage.setItem("accessToken", accessToken);
-      localStorage.setItem("user", JSON.stringify(user));
+
+      dispatch(getUsers());
 
       message.success("Login successful!");
       navigate("/");
@@ -45,7 +56,7 @@ const Login = () => {
         error.response?.data?.message || "Invalid email or password!"
       );
     } finally {
-      setLoading(false);
+      setLoadingAction(false);
     }
   };
 
@@ -138,7 +149,7 @@ const Login = () => {
                 fullWidth
                 size="large"
                 variant="contained"
-                disabled={loading}
+                disabled={loadingAction}
                 sx={{
                   backgroundColor: "#FF7043",
                   color: "#fff",
@@ -158,7 +169,7 @@ const Login = () => {
                   },
                 }}
               >
-                {loading ? "Logging in..." : "Login"}
+                {loadingAction ? "Logging in..." : "Login"}
               </Button>
             </Form>
           </CardContent>

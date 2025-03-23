@@ -10,12 +10,20 @@ import {
   Tooltip,
   Container,
 } from "@mui/material";
+<<<<<<< HEAD
 import { Button } from "antd";
 import { FaSearch } from "react-icons/fa";
 import MenuIcon from "@mui/icons-material/Menu";
 import Logo from "@/components/UI/Logo";
 import AvatarComponent from "@/components/UI/Avatar";
 import MenuComponents from "@/components/UI/Menu/MenuComponent";
+=======
+import { Button, Space } from "antd";
+import { FaSearch } from "react-icons/fa";
+import MenuIcon from "@mui/icons-material/Menu";
+import Logo from "@/components/UI/Logo/Logo";
+import AvatarComponent from "@/components/UI/Avatar/Avatar";
+>>>>>>> 062d66fdbea9fa18a5efed0a6180e4eaeb5a9d63
 
 const pages: string[] = ["Products", "Pricing", "Blog"];
 
