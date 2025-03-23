@@ -14,7 +14,6 @@ const initialState: UserState = {
   error: null,
 };
 
-// Thêm generic types cho createAsyncThunk
 export const getUsers = createAsyncThunk<UserInterface, void, { rejectValue: string }>(
   "user/getUserProfile",
   async (_, { rejectWithValue }) => {
