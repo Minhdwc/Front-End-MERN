@@ -39,6 +39,7 @@
     "react-scripts": "5.0.1",
     "react-tsparticles": "^2.12.2",
     "redux": "^5.0.1",
+    "swiper": "^11.2.6",
     "tailwind-merge": "^3.0.2",
     "tailwindcss": "^4.0.9",
     "tsparticles": "^3.8.1",

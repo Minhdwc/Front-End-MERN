@@ -19,7 +19,6 @@ const menuNotLoggedIn = [
 const AvatarComponent = () => {
   const navigate = useNavigate();
   const [anchorElUser, setAnchorElUser] = useState<null | HTMLElement>(null);
-  const [loading, setLoading] = useState(false);
 
   const user = useSelector((state: RootState) => state.user.userInfo);
 
@@ -33,10 +32,8 @@ const AvatarComponent = () => {
 
   const handleChooseItemMenu = (url: string) => {
     if (url === "/logout") {
-      setLoading(true);
       localStorage.removeItem("accessToken");
       setTimeout(() => {
-        setLoading(false);
         window.location.reload();
       }, 1000);
     } else {
@@ -51,7 +48,7 @@ const AvatarComponent = () => {
           {user?.data ? (
             <Avatar alt="User" src={user.data.image} />
           ) : (
-            <FaRegUser style={{ fontSize: 24, color: "#ffffff" }} />
+            <FaRegUser style={{ fontSize: 24, color: "#000" }} />
           )}
         </IconButton>
       </Tooltip>
@@ -61,18 +58,11 @@ const AvatarComponent = () => {
         open={Boolean(anchorElUser)}
         onClose={handleCloseMenu}
       >
-        {loading ? (
-          <MenuItem disabled>
-            <Spin size="small" style={{ marginRight: 8 }} />
-            <Typography textAlign="center">Đang đăng xuất...</Typography>
+        {(user ? menuLoggedIn : menuNotLoggedIn).map(({ name, url }) => (
+          <MenuItem key={name} onClick={() => handleChooseItemMenu(url)}>
+            <Typography textAlign="center">{name}</Typography>
           </MenuItem>
-        ) : (
-          (user ? menuLoggedIn : menuNotLoggedIn).map(({ name, url }) => (
-            <MenuItem key={name} onClick={() => handleChooseItemMenu(url)}>
-              <Typography textAlign="center">{name}</Typography>
-            </MenuItem>
-          ))
-        )}
+        ))}
       </Menu>
     </Box>
   );

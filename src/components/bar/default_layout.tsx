@@ -10,7 +10,7 @@ const DefaultLayout: React.FC<{ children: React.ReactNode }> = ({
 }) => {
   return (
     <>
-      <Layout.Header>
+      <Layout.Header className="!bg-white !text-black !h-auto !p-0 shadow-md">
         <HeaderComponent />
       </Layout.Header>
       <Layout.Content>
