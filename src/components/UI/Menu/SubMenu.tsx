@@ -1,5 +1,4 @@
 import { Menu } from "antd";
-
 interface SubMenuProps {
   items: string[];
 }

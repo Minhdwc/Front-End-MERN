@@ -1,106 +1,34 @@
-import React, { useState } from "react";
-import {
-  AppBar,
-  Toolbar,
-  IconButton,
-  Menu,
-  MenuItem,
-  Box,
-  Typography,
-  Tooltip,
-  Container,
-} from "@mui/material";
-import { Button } from "antd";
-import { FaSearch } from "react-icons/fa";
-import MenuIcon from "@mui/icons-material/Menu";
 import Logo from "@/components/UI/Logo/Logo";
+import { Box, Typography, AppBar, IconButton } from "@mui/material";
+import { BellOutlined, SearchOutlined, HeartOutlined } from "@ant-design/icons";
+import MenuComponent from "@/components/UI/Menu/MenuComponent";
 import AvatarComponent from "@/components/UI/Avatar/Avatar";
-import MenuComponents from "@/components/UI/Menu/MenuComponent";
-
-const pages: string[] = ["Products", "Pricing", "Blog"];
+import CustomIcon from "@/components/UI/Icon/icon";
 
 const HeaderComponent = () => {
-  const [anchorElNav, setAnchorElNav] = useState<null | HTMLElement>(null);
-
-  const handleOpenNavMenu = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorElNav(event.currentTarget);
-  };
-
-  const handleCloseNavMenu = () => {
-    setAnchorElNav(null);
-  };
-
   return (
-    <AppBar
-      position="sticky"
-      sx={{
-        backgroundColor: "#fff",
-        boxShadow: "none",
-        borderBottom: "2px solid #ff5722",
-      }}
-    >
-      <Container maxWidth="xl">
-        <Toolbar
-          sx={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-          }}
-        >
-          {/* Logo */}
-          <Box sx={{ display: "flex", alignItems: "center" }}>
-            <Logo image="/logo.png" />
-          </Box>
+    <AppBar position="sticky" elevation={0} sx={{ backgroundColor: "white" }}>
+      <Box className="bg-amber-500 text-center py-1">
+        <Typography color="white" fontSize={16} fontWeight="bold">
+          Pet is my friend 🐶🐱
+        </Typography>
+      </Box>
+      <Box className="flex justify-between items-center py-2 px-3">
+        <Logo image="/logo.png" />
 
-          {/* Menu cho mobile */}
-          <Box sx={{ flexGrow: 1, display: { xs: "flex", md: "none" } }}>
-            <IconButton
-              size="large"
-              aria-label="open menu"
-              onClick={handleOpenNavMenu}
-              color="inherit"
-            >
-              <MenuIcon />
-            </IconButton>
-            <Menu
-              anchorEl={anchorElNav}
-              open={Boolean(anchorElNav)}
-              onClose={handleCloseNavMenu}
-            >
-              {pages.map((page) => (
-                <MenuItem key={page} onClick={handleCloseNavMenu}>
-                  <Typography textAlign="center">{page}</Typography>
-                </MenuItem>
-              ))}
-            </Menu>
-          </Box>
+        <Box className="hidden md:flex">
+          <MenuComponent />
+        </Box>
 
-          {/* Menu Desktop */}
-          <Box
-            sx={{
-              display: { xs: "none", md: "flex" },
-              flexGrow: 1,
-              justifyContent: "center",
-            }}
-          >
-            <MenuComponents />
-          </Box>
-
-          {/* Search & Avatar */}
-          <Box
-            sx={{ flexGrow: 0, display: "flex", alignItems: "center", gap: 2 }}
-          >
-            <Tooltip title="Tìm kiếm">
-              <Button
-                shape="circle"
-                icon={<FaSearch />}
-                className="btn-header"
-              />
-            </Tooltip>
-            <AvatarComponent />
-          </Box>
-        </Toolbar>
-      </Container>
+        <Box className="flex items-center gap-3">
+          <IconButton color="default">
+            <SearchOutlined />
+          </IconButton>
+          <AvatarComponent />
+          <CustomIcon icon={<HeartOutlined />} content="Wishlist" />
+          <CustomIcon icon={<BellOutlined />} content="Notifications" />
+        </Box>
+      </Box>
     </AppBar>
   );
 };

@@ -6,8 +6,6 @@ import {
   DefaultLayoutAdmin,
 } from "./components/bar/default_layout";
 
-import { useAppDispatch, useAppSelector } from "./store/hook";
-
 function App() {
   return (
     <Router>
