@@ -11,7 +11,7 @@ const forgotPasswordPage = React.lazy(()=>import('../pages/auth/forgotPassword')
 const dashboardAdminPage = React.lazy(()=>import('../pages/admin/dashboard'))
 
 //Page of user
-const homePage = React.lazy(()=>import('../pages/user/home'))
+const homePage = React.lazy(()=>import('../pages/user/HomePage/home'))
 
 export interface Route{
     path: string,
