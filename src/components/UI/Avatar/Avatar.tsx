@@ -1,11 +1,12 @@
-import { Tooltip, Avatar, Spin } from "antd";
+import { Tooltip, Avatar } from "antd";
 import { Menu, Box, IconButton, Typography, MenuItem } from "@mui/material";
 import React, { useState } from "react";
 import { FaRegUser } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/store/store";
-
+import { clearUser } from "@/store/services/user/userSlice";
+import { persistor } from "@/store/store";
 const menuLoggedIn = [
   { name: "Profile", url: "/profile" },
   { name: "Cart", url: "/cart" },
@@ -17,9 +18,9 @@ const menuNotLoggedIn = [
 ];
 
 const AvatarComponent = () => {
-  const navigate = useNavigate();
   const [anchorElUser, setAnchorElUser] = useState<null | HTMLElement>(null);
-
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
   const user = useSelector((state: RootState) => state.user.userInfo);
 
   const handleOpenMenu = (event: React.MouseEvent<HTMLElement>) => {
@@ -33,9 +34,11 @@ const AvatarComponent = () => {
   const handleChooseItemMenu = (url: string) => {
     if (url === "/logout") {
       localStorage.removeItem("accessToken");
+      dispatch(clearUser());
+      persistor.purge();
       setTimeout(() => {
         window.location.reload();
-      }, 1000);
+      }, 500);
     } else {
       navigate(url);
     }
