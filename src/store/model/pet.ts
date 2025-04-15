@@ -11,5 +11,6 @@ export interface PetInterface {
     };
     color: string;
     image: string;
+    price: number;
     createAt: string;
 }

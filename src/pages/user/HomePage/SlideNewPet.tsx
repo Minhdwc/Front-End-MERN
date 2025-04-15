@@ -15,10 +15,12 @@ import {
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
+import authorizedAxiosInstance from "@/ultils/authorAxios";
 import Slider from "react-slick";
 import { PetInterface } from "@/store/model/pet";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
+import { Toaster, toast } from "react-hot-toast";
 import { Card as AntCard } from "antd";
 const { Meta } = AntCard;
 
@@ -30,11 +32,69 @@ export function SlideNewPet() {
   const eightLatestPets = pets.data.slice(0, 8);
   const navigate = useNavigate();
   const location = useLocation();
-  const onClickAddToCart = () => {
+  const onClickAddToCart = async (pet: PetInterface) => {
     if (!localStorage.getItem("accessToken")) {
       navigate("/auth/login", { state: { from: location.pathname } });
-    } else {
-      alert(`user ${user.userInfo?.data.name}`);
+      return;
+    }
+
+    try {
+      const idUser = user.userInfo.data._id;
+
+      let userCart;
+      try {
+        const res = await authorizedAxiosInstance.get(`/cart/get/c=${idUser}`);
+        userCart = res.data?.data;
+        console.log(userCart);
+      } catch (err) {
+        userCart = null;
+      }
+
+      const itemData = [
+        {
+          idPet: pet._id,
+          quantity: userCart ? userCart.length + 1 : 1,
+          price: pet.price,
+          totalPrice: pet.price * (userCart ? userCart.length + 1 : 1),
+          image: pet.image || "",
+        },
+      ];
+
+      const payload = {
+        item: itemData,
+      };
+
+      if (userCart) {
+        const res = await authorizedAxiosInstance.post(
+          `/cart/update/u=${idUser}`,
+          payload
+        );
+        if (res.data.status === "Updated") {
+          toast.success("🛒 Cập nhật giỏ hàng thành công!", {
+            position: "top-right",
+            duration: 3000,
+          });
+        }
+      } else {
+        const createPayload = {
+          item: itemData,
+        };
+        const res = await authorizedAxiosInstance.post(
+          "/cart/create",
+          createPayload
+        );
+        if (res.data.status === "Created") {
+          toast.success("🛒 Tạo giỏ hàng mới và thêm sản phẩm thành công!", {
+            position: "top-right",
+            duration: 3000,
+          });
+        }
+      }
+    } catch (err) {
+      toast.error("❌ Có lỗi xảy ra khi thêm vào giỏ hàng!", {
+        position: "top-right",
+        duration: 3000,
+      });
     }
   };
 
@@ -58,7 +118,8 @@ export function SlideNewPet() {
   };
 
   return (
-    <Box sx={{ mt: 4 }}>
+    <Box sx={{ mt: 4, mb: 4 }}>
+      <Toaster />
       {loading && <Typography>Loading...</Typography>}
       {error && <Typography color="error">{error}</Typography>}
 
@@ -70,7 +131,7 @@ export function SlideNewPet() {
         textAlign="center"
         color="primary"
       >
-        🐾 New Arrivals
+        🐾 New Pets
       </Typography>
 
       <Slider {...settings}>
@@ -142,7 +203,16 @@ export function SlideNewPet() {
                 }}
               >
                 <Meta
-                  title={<Typography fontWeight="bold">{pet.name}</Typography>}
+                  title={
+                    <div>
+                      <Typography fontWeight="bold">
+                        {pet.name} - {pet.generic}
+                      </Typography>
+                      <Typography fontWeight="bold" color="secondary">
+                        {pet.price}$
+                      </Typography>
+                    </div>
+                  }
                   description={
                     <Stack
                       direction="row"
@@ -154,7 +224,7 @@ export function SlideNewPet() {
                         <IconButton
                           color="primary"
                           sx={{ bgcolor: "#e3f2fd" }}
-                          onClick={onClickAddToCart}
+                          onClick={() => onClickAddToCart(pet)}
                         >
                           <ShoppingCartIcon />
                         </IconButton>

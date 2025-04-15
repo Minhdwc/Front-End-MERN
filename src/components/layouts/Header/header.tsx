@@ -1,6 +1,11 @@
 import Logo from "@/components/UI/Logo/Logo";
 import { Box, Typography, AppBar, IconButton } from "@mui/material";
-import { BellOutlined, SearchOutlined, HeartOutlined } from "@ant-design/icons";
+import {
+  BellOutlined,
+  SearchOutlined,
+  HeartOutlined,
+  ShoppingCartOutlined,
+} from "@ant-design/icons";
 import MenuComponent from "@/components/UI/Menu/MenuComponent";
 import AvatarComponent from "@/components/UI/Avatar/Avatar";
 import CustomIcon from "@/components/UI/Icon/icon";
@@ -27,6 +32,7 @@ const HeaderComponent = () => {
           <AvatarComponent />
           <CustomIcon icon={<HeartOutlined />} content="Wishlist" />
           <CustomIcon icon={<BellOutlined />} content="Notifications" />
+          <CustomIcon icon={<ShoppingCartOutlined />} content="Cart" />
         </Box>
       </Box>
     </AppBar>

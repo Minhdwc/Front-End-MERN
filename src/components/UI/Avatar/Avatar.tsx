@@ -1,6 +1,6 @@
 import { Tooltip, Avatar } from "antd";
 import { Menu, Box, IconButton, Typography, MenuItem } from "@mui/material";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { FaRegUser } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
