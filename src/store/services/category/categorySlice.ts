@@ -18,13 +18,13 @@ const initialState: CategoryState = {
   error: null,
 };
 
-// Hàm gọi API dựa trên type
 const fetchCategoryByType = async (type: string) => {
-  const response = await authorizedAxiosInstance.get(`/api/v1/category/get/type/t=${type}`);
+  const response = await authorizedAxiosInstance.get(
+    `/api/v1/category/get/type/t=${type}`
+  );
   return response.data as categoryInterface[];
 };
 
-// Gọi API lấy danh mục Pet
 export const fetchPetCategories = createAsyncThunk<
   categoryInterface[],
   void,
@@ -33,11 +33,12 @@ export const fetchPetCategories = createAsyncThunk<
   try {
     return await fetchCategoryByType("Pet");
   } catch (error: any) {
-    return rejectWithValue(error.response?.data?.message || "Failed to fetch Pet categories");
+    return rejectWithValue(
+      error.response?.data?.message || "Failed to fetch Pet categories"
+    );
   }
 });
 
-// Gọi API lấy danh mục Food
 export const fetchFoodCategories = createAsyncThunk<
   categoryInterface[],
   void,
@@ -46,11 +47,12 @@ export const fetchFoodCategories = createAsyncThunk<
   try {
     return await fetchCategoryByType("Food");
   } catch (error: any) {
-    return rejectWithValue(error.response?.data?.message || "Failed to fetch Food categories");
+    return rejectWithValue(
+      error.response?.data?.message || "Failed to fetch Food categories"
+    );
   }
 });
 
-// Gọi API lấy danh mục Accessory
 export const fetchAccessoryCategories = createAsyncThunk<
   categoryInterface[],
   void,
@@ -59,7 +61,9 @@ export const fetchAccessoryCategories = createAsyncThunk<
   try {
     return await fetchCategoryByType("Assessory");
   } catch (error: any) {
-    return rejectWithValue(error.response?.data?.message || "Failed to fetch Accessory categories");
+    return rejectWithValue(
+      error.response?.data?.message || "Failed to fetch Accessory categories"
+    );
   }
 });
 
@@ -73,10 +77,13 @@ const categorySlice = createSlice({
         state.loading = true;
         state.error = null;
       })
-      .addCase(fetchPetCategories.fulfilled, (state, action: PayloadAction<categoryInterface[]>) => {
-        state.loading = false;
-        state.petCategories = action.payload;
-      })
+      .addCase(
+        fetchPetCategories.fulfilled,
+        (state, action: PayloadAction<categoryInterface[]>) => {
+          state.loading = false;
+          state.petCategories = action.payload;
+        }
+      )
       .addCase(fetchPetCategories.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload || "Failed to fetch Pet categories";
@@ -87,10 +94,13 @@ const categorySlice = createSlice({
         state.loading = true;
         state.error = null;
       })
-      .addCase(fetchFoodCategories.fulfilled, (state, action: PayloadAction<categoryInterface[]>) => {
-        state.loading = false;
-        state.foodCategories = action.payload;
-      })
+      .addCase(
+        fetchFoodCategories.fulfilled,
+        (state, action: PayloadAction<categoryInterface[]>) => {
+          state.loading = false;
+          state.foodCategories = action.payload;
+        }
+      )
       .addCase(fetchFoodCategories.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload || "Failed to fetch Food categories";
@@ -101,10 +111,13 @@ const categorySlice = createSlice({
         state.loading = true;
         state.error = null;
       })
-      .addCase(fetchAccessoryCategories.fulfilled, (state, action: PayloadAction<categoryInterface[]>) => {
-        state.loading = false;
-        state.accessoryCategories = action.payload;
-      })
+      .addCase(
+        fetchAccessoryCategories.fulfilled,
+        (state, action: PayloadAction<categoryInterface[]>) => {
+          state.loading = false;
+          state.accessoryCategories = action.payload;
+        }
+      )
       .addCase(fetchAccessoryCategories.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload || "Failed to fetch Accessory categories";

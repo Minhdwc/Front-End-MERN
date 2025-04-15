@@ -2,7 +2,7 @@ import React from "react";
 import { Layout } from "antd";
 import { Container } from "@mui/material";
 import HeaderComponent from "../layouts/Header/header";
-import FooterComponent from "../layouts/Footer/Footer";
+import FooterComponents from "../layouts/Footer/Footer";
 import Sidebar from "../UI/Sidebar/Sidebar";
 
 const DefaultLayout: React.FC<{ children: React.ReactNode }> = ({
@@ -17,7 +17,7 @@ const DefaultLayout: React.FC<{ children: React.ReactNode }> = ({
         <Container>{children}</Container>
       </Layout.Content>
       <Layout.Footer>
-        <FooterComponent />
+        <FooterComponents />
       </Layout.Footer>
     </>
   );

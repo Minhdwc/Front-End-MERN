@@ -2,7 +2,6 @@ import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import authorizedAxiosInstance from "@/ultils/authorAxios";
 import { PetInterface } from "@/store/model/pet";
 
-// Định nghĩa kiểu dữ liệu trả về từ API
 interface PetResponse {
   status: string;
   data: PetInterface[];
@@ -11,7 +10,6 @@ interface PetResponse {
   message: string;
 }
 
-// Định nghĩa state của slice
 interface PetState {
   pets: PetResponse;
   petInfo: PetInterface | null;
@@ -19,7 +17,6 @@ interface PetState {
   error: string | null;
 }
 
-// Khởi tạo giá trị ban đầu
 const initialState: PetState = {
   pets: {
     status: "",
