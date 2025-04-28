@@ -13,7 +13,7 @@ const CustomIcon = ({
 
   return (
     <div className="relative inline-block">
-      {number && number > 0 && (
+      {number !== undefined && (
         <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full z-10">
           {number}
         </span>
