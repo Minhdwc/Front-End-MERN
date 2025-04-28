@@ -28,9 +28,6 @@ const Login = () => {
   const navigate = useNavigate();
   const [loadingAction, setLoadingAction] = useState(false);
   const dispatch = useDispatch<AppDispatch>();
-  const { userInfo, loading, error } = useSelector(
-    (state: RootState) => state.user
-  );
 
   const onFinish = async (values: { email: string; password: string }) => {
     setLoadingAction(true);

@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState, AppDispatch } from "@/store/store";
 import { getAllPet } from "@/store/services/pet/petSlice";
+import { addItemToCart } from "@/store/services/cart/cartSlice";
 import {
   Typography,
   Card as MUICard,
@@ -15,7 +16,6 @@ import {
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
-import authorizedAxiosInstance from "@/ultils/authorAxios";
 import Slider from "react-slick";
 import { PetInterface } from "@/store/model/pet";
 import "slick-carousel/slick/slick.css";
@@ -37,64 +37,16 @@ export function SlideNewPet() {
       navigate("/auth/login", { state: { from: location.pathname } });
       return;
     }
-
     try {
       const idUser = user.userInfo.data._id;
+      await dispatch(addItemToCart({ userId: idUser, pet }));
 
-      let userCart;
-      try {
-        const res = await authorizedAxiosInstance.get(`/cart/get/c=${idUser}`);
-        userCart = res.data?.data;
-        console.log(userCart);
-      } catch (err) {
-        userCart = null;
-      }
-
-      const itemData = [
-        {
-          idPet: pet._id,
-          quantity: userCart ? userCart.length + 1 : 1,
-          price: pet.price,
-          totalPrice: pet.price * (userCart ? userCart.length + 1 : 1),
-          image: pet.image || "",
-        },
-      ];
-
-      const payload = {
-        item: itemData,
-      };
-
-      if (userCart) {
-        const res = await authorizedAxiosInstance.post(
-          `/cart/update/u=${idUser}`,
-          payload
-        );
-        if (res.data.status === "Updated") {
-          toast.success("🛒 Cập nhật giỏ hàng thành công!", {
-            position: "top-right",
-            duration: 3000,
-          });
-        }
-      } else {
-        const createPayload = {
-          item: itemData,
-        };
-        const res = await authorizedAxiosInstance.post(
-          "/cart/create",
-          createPayload
-        );
-        if (res.data.status === "Created") {
-          toast.success("🛒 Tạo giỏ hàng mới và thêm sản phẩm thành công!", {
-            position: "top-right",
-            duration: 3000,
-          });
-        }
-      }
-    } catch (err) {
-      toast.error("❌ Có lỗi xảy ra khi thêm vào giỏ hàng!", {
+      toast.success("✅ Pet added to cart!", {
         position: "top-right",
         duration: 3000,
       });
+    } catch (err: any) {
+      console.log(err.message);
     }
   };
 

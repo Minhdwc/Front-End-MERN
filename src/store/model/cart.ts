@@ -1,13 +1,12 @@
 export interface ItemCartInteface{
-    idPet: String;
-    idProduct: String;
-    quantity: Number;
-    price: Number;
-    totalPrice: Number;
-    image: String
+    idPet: string | null;
+    idProduct: string | null;
+    quantity: number;
+    price: number;
+    totalPrice: number;
 }
 
 export interface CartInterface{
     item:ItemCartInteface[];
-    userId: String;
+    userId: string;
 }
