@@ -35,12 +35,6 @@ export default function PetDetail({ pet }) {
                     width: "100%",
                     transition: "transform 0.3s ease",
                   }}
-                  onMouseOver={(e) => {
-                    e.currentTarget.style.transform = "scale(1.03)";
-                  }}
-                  onMouseOut={(e) => {
-                    e.currentTarget.style.transform = "scale(1)";
-                  }}
                 />
               </Box>
             }
@@ -228,16 +222,6 @@ export default function PetDetail({ pet }) {
                   cursor: "pointer",
                   transition: "all 0.3s ease",
                   boxShadow: "0 4px 12px rgba(63, 81, 181, 0.2)",
-                }}
-                onMouseOver={(e) => {
-                  e.currentTarget.style.backgroundColor = "#303f9f";
-                  e.currentTarget.style.boxShadow =
-                    "0 6px 14px rgba(63, 81, 181, 0.3)";
-                }}
-                onMouseOut={(e) => {
-                  e.currentTarget.style.backgroundColor = "#3f51b5";
-                  e.currentTarget.style.boxShadow =
-                    "0 4px 12px rgba(63, 81, 181, 0.2)";
                 }}
               >
                 Liên hệ về {pet.name}

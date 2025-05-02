@@ -109,7 +109,6 @@ export const deleteCart = createAsyncThunk<CartInterface, {id: string}>(
   async ({ id }, { rejectWithValue }) => {
     try {
       const response = await authorizedAxiosInstance.delete(`/cart/delete/d=${id}`);
-      console.log(response.data);
       if (response.data?.status ==='Deleted') {
         persistor.purge();
         return response.data?.cart as CartInterface;
