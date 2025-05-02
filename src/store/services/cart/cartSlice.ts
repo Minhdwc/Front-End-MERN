@@ -2,8 +2,9 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import authorizedAxiosInstance from "@/ultils/authorAxios";
 import { CartInterface, ItemCartInteface } from "@/store/model/cart";
 import { PetInterface } from "@/store/model/pet";
-import { ProductInterface } from "@/store/model/product";
 import { persistor } from "@/store/store";
+import { FoodInterface } from "@/store/model/food";
+import { AccessoryInterface } from "@/store/model/accessory";
 
 interface CartState {
   cart: CartInterface | null;
@@ -35,10 +36,15 @@ export const getCartByUserId = createAsyncThunk<CartInterface, string>(
 
 export const addItemToCart = createAsyncThunk<
   CartInterface,
-  { userId: string; pet?: PetInterface; product?: ProductInterface }
+  {
+    userId: string;
+    pet?: PetInterface;
+    food?: FoodInterface;
+    accessory?: AccessoryInterface;
+  }
 >(
   "cart/addItemToCart",
-  async ({ userId, pet, product }, { rejectWithValue }) => {
+  async ({ userId, pet, food, accessory }, { rejectWithValue }) => {
     try {
       const res = await authorizedAxiosInstance.get(`/cart/get/c=${userId}`);
       const userCart = res.data?.data?.[0] as CartInterface;
@@ -47,40 +53,42 @@ export const addItemToCart = createAsyncThunk<
         ? [...userCart.item]
         : [];
 
+      const pushItem = (
+        type: "Pet" | "Food" | "Accessory",
+        data: { _id?: string; price?: number }
+      ) => {
+        if (!data._id || data.price === undefined) {
+          throw new Error(`${type} item missing _id or price`);
+        }
+
+        const index = cartItemUpdate.findIndex(
+          (item) =>
+            item.itemType === type &&
+            item.itemId?.toString() === data._id?.toString()
+        );
+
+        if (index > -1) {
+          cartItemUpdate[index].quantity += 1;
+          cartItemUpdate[index].totalPrice += data.price;
+        } else {
+          cartItemUpdate.push({
+            itemType: type,
+            itemId: data._id,
+            quantity: 1,
+            price: data.price,
+            totalPrice: data.price,
+          });
+        }
+      };
+
       if (pet) {
-        const index = cartItemUpdate.findIndex(
-          (item) => item.idPet?.toString() === pet._id.toString()
-        );
-
-        if (index > -1) {
-          cartItemUpdate[index].quantity += 1;
-          cartItemUpdate[index].totalPrice += pet.price;
-        } else {
-          cartItemUpdate.push({
-            idPet: pet._id,
-            idProduct: null,
-            quantity: 1,
-            price: pet.price,
-            totalPrice: pet.price
-          });
-        }
-      } else if (product) {
-        const index = cartItemUpdate.findIndex(
-          (item) => item.idProduct?.toString() === product._id.toString()
-        );
-
-        if (index > -1) {
-          cartItemUpdate[index].quantity += 1;
-          cartItemUpdate[index].totalPrice += product.price;
-        } else {
-          cartItemUpdate.push({
-            idPet: null,
-            idProduct: product._id,
-            quantity: 1,
-            price: product.price,
-            totalPrice: product.price,
-          });
-        }
+        pushItem("Pet", pet);
+      } else if (food) {
+        pushItem("Food", food);
+      } else if (accessory) {
+        pushItem("Accessory", accessory);
+      } else {
+        throw new Error("No valid item to add");
       }
 
       const payload = { item: cartItemUpdate };
@@ -98,18 +106,20 @@ export const addItemToCart = createAsyncThunk<
         );
         return createResponse.data as CartInterface;
       }
-    } catch {
-      return rejectWithValue("Failed");
+    } catch (err: any) {
+      return rejectWithValue("Failed to add item to cart");
     }
   }
 );
 
-export const deleteCart = createAsyncThunk<CartInterface, {id: string}>(
+export const deleteCart = createAsyncThunk<CartInterface, { id: string }>(
   "cart/delete",
   async ({ id }, { rejectWithValue }) => {
     try {
-      const response = await authorizedAxiosInstance.delete(`/cart/delete/d=${id}`);
-      if (response.data?.status ==='Deleted') {
+      const response = await authorizedAxiosInstance.delete(
+        `/cart/delete/d=${id}`
+      );
+      if (response.data?.status === "Deleted") {
         persistor.purge();
         return response.data?.cart as CartInterface;
       }
@@ -121,11 +131,10 @@ export const deleteCart = createAsyncThunk<CartInterface, {id: string}>(
   }
 );
 
-
 export const increaseQuantity = createAsyncThunk<
   CartInterface,
-  { userId: string; id: string }
->("cart/increase", async ({ userId, id }, { rejectWithValue }) => {
+  { userId: string; id: string; itemType: "Pet" | "Food" | "Accessory" }
+>("cart/increase", async ({ userId, id, itemType }, { rejectWithValue }) => {
   try {
     const res = await authorizedAxiosInstance.get(`/cart/get/c=${userId}`);
     const userCart = res.data?.data?.[0] as CartInterface;
@@ -133,7 +142,7 @@ export const increaseQuantity = createAsyncThunk<
 
     const updatedItems = userCart.item.map((item) => {
       const match =
-        item.idPet?.toString() === id || item.idProduct?.toString() === id;
+        item.itemType === itemType && item.itemId?.toString() === id;
       if (match) {
         return {
           ...item,
@@ -149,15 +158,15 @@ export const increaseQuantity = createAsyncThunk<
       { item: updatedItems }
     );
     return response.data as CartInterface;
-  } catch (err: unknown) {
+  } catch (err: any) {
     return rejectWithValue("Failed to increase quantity");
   }
 });
 
 export const decreaseQuantity = createAsyncThunk<
   CartInterface,
-  { userId: string; id: string }
->("cart/decrease", async ({ userId, id }, { rejectWithValue }) => {
+  { userId: string; id: string; itemType: "Pet" | "Food" | "Accessory" }
+>("cart/decrease", async ({ userId, id, itemType }, { rejectWithValue }) => {
   try {
     const res = await authorizedAxiosInstance.get(`/cart/get/c=${userId}`);
     const userCart = res.data?.data?.[0] as CartInterface;
@@ -165,7 +174,7 @@ export const decreaseQuantity = createAsyncThunk<
 
     const updatedItems = userCart.item.map((item) => {
       const match =
-        item.idPet?.toString() === id || item.idProduct?.toString() === id;
+        item.itemType === itemType && item.itemId?.toString() === id;
       if (match && item.quantity > 1) {
         return {
           ...item,
@@ -181,23 +190,22 @@ export const decreaseQuantity = createAsyncThunk<
       { item: updatedItems }
     );
     return response.data as CartInterface;
-  } catch (err: unknown) {
+  } catch (err: any) {
     return rejectWithValue("Failed to decrease quantity");
   }
 });
 
 export const deleteItemInCart = createAsyncThunk<
   CartInterface,
-  { userId: string; id: string }
->("cart/deleteItem", async ({ userId, id }, { rejectWithValue }) => {
+  { userId: string; id: string; itemType: "Pet" | "Food" | "Accessory" }
+>("cart/deleteItem", async ({ userId, id, itemType }, { rejectWithValue }) => {
   try {
     const res = await authorizedAxiosInstance.get(`/cart/get/c=${userId}`);
     const userCart = res.data?.data?.[0] as CartInterface;
     if (!userCart) throw new Error("Cart not found");
 
     const updatedItems = userCart.item.filter(
-      (item) =>
-        item.idPet?.toString() !== id && item.idProduct?.toString() !== id
+      (item) => item.itemType !== itemType || item.itemId?.toString() !== id
     );
 
     const response = await authorizedAxiosInstance.post(
@@ -205,11 +213,10 @@ export const deleteItemInCart = createAsyncThunk<
       { item: updatedItems }
     );
     return response.data as CartInterface;
-  } catch (err: unknown) {
+  } catch (err: any) {
     return rejectWithValue("Failed to delete item");
   }
 });
-
 
 const cartSlice = createSlice({
   name: "cart",

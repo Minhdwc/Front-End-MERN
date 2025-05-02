@@ -12,5 +12,6 @@ export interface PetInterface {
     color: string;
     image: string;
     price: number;
+    Model_Url_3D: string;
     createAt: string;
 }

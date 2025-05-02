@@ -1,3 +1,6 @@
+import { PetInterface } from "@/store/model/pet";
+import { addItemToCart } from "@/store/services/cart/cartSlice";
+import { AppDispatch, RootState } from "@/store/store";
 import {
   Box,
   Typography,
@@ -8,9 +11,34 @@ import {
   Paper,
 } from "@mui/material";
 import { Card as AntCard, Tag } from "antd";
+import toast from "react-hot-toast";
+import { useDispatch, useSelector } from "react-redux";
+import { useLocation, useNavigate } from "react-router-dom";
 const { Meta } = AntCard;
 
-export default function PetDetail({ pet }) {
+export default function PetDetail({ pet }: { pet: PetInterface }) {
+  const dispatch = useDispatch<AppDispatch>();
+  const user = useSelector((state: RootState) => state.user);
+  const navigate = useNavigate();
+  const location = useLocation();
+  console.log(pet);
+  const onClickAddToCart = async (pet: PetInterface) => {
+    if (!localStorage.getItem("accessToken")) {
+      navigate("/auth/login", { state: { from: location.pathname } });
+      return;
+    }
+    try {
+      const idUser = user.userInfo.data._id;
+      await dispatch(addItemToCart({ userId: idUser, pet }));
+
+      toast.success("✅ Pet added to cart!", {
+        position: "top-right",
+        duration: 3000,
+      });
+    } catch (err: any) {
+      console.log(err.message);
+    }
+  };
   if (!pet) return <Typography>No pet found</Typography>;
 
   return (
@@ -210,7 +238,10 @@ export default function PetDetail({ pet }) {
               </Grid>
             </Box>
 
-            <Box mt={4} sx={{ textAlign: "center" }}>
+            <Box
+              mt={4}
+              sx={{ display: "flex", justifyContent: "space-around" }}
+            >
               <button
                 style={{
                   backgroundColor: "#3f51b5",
@@ -224,7 +255,23 @@ export default function PetDetail({ pet }) {
                   boxShadow: "0 4px 12px rgba(63, 81, 181, 0.2)",
                 }}
               >
-                Liên hệ về {pet.name}
+                Tư vấn thông tin
+              </button>
+              <button
+                style={{
+                  backgroundColor: "#3f51b5",
+                  color: "white",
+                  border: "none",
+                  padding: "10px 24px",
+                  borderRadius: "30px",
+                  fontWeight: "bold",
+                  cursor: "pointer",
+                  transition: "all 0.3s ease",
+                  boxShadow: "0 4px 12px rgba(63, 81, 181, 0.2)",
+                }}
+                onClick={() => onClickAddToCart(pet)}
+              >
+                Thêm vào giỏ hàng
               </button>
             </Box>
           </Paper>

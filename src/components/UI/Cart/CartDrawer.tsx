@@ -14,9 +14,16 @@ const CartDrawer = () => {
   const [productData, setProductData] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
 
-  const fetchDataProduct = async (id: string, isPet: boolean) => {
+  const fetchDataProduct = async (id: string, type: string) => {
     try {
-      const url = isPet ? `/pet/get/d=${id}` : `/product/get/d=${id}`;
+      var url = "";
+      if (type === "Pet") {
+        url = `/pet/get/d=${id}`;
+      } else if (type === "Accessory") {
+        url = `/accessory/get/d=${id}`;
+      } else {
+        url = `/food/get/d=${id}`;
+      }
       const response = await authorizedAxiosInstance.get(url);
       return response.data;
     } catch (error) {
@@ -27,15 +34,28 @@ const CartDrawer = () => {
 
   const loadProductData = async () => {
     setLoading(true);
-    const data = await Promise.all(
-      (cart?.item || []).map(async (item) => {
-        const id = item.idProduct || item.idPet;
-        const isPet = !!item.idPet;
-        return await fetchDataProduct(id, isPet);
-      })
-    );
-    setProductData(data.filter((item) => item !== null));
-    setLoading(false);
+
+    const productPromises = (cart?.item || []).map(async (item) => {
+      const id = item.itemId;
+      const type = item.itemType;
+      console.log(item);
+
+      if (!type) {
+        console.error("Item type is missing:", item);
+        return null;
+      }
+
+      return fetchDataProduct(id, type);
+    });
+
+    try {
+      const data = await Promise.all(productPromises);
+      setProductData(data.filter((item) => item !== null));
+    } catch (error) {
+      console.error("Error loading product data:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {

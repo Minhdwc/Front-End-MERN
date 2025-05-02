@@ -1,6 +1,6 @@
 export interface ItemCartInteface{
-    idPet: string | null;
-    idProduct: string | null;
+    itemType: "Pet" | "Food" | "Accessory";
+    itemId: string;
     quantity: number;
     price: number;
     totalPrice: number;
