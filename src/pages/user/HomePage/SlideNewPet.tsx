@@ -49,7 +49,9 @@ export function SlideNewPet() {
       console.log(err.message);
     }
   };
-
+  const onClickDetailHandle = async (id: string) => {
+    navigate(`/detail/pet_${id}`);
+  };
   useEffect(() => {
     dispatch(getAllPet());
   }, [dispatch]);
@@ -182,7 +184,11 @@ export function SlideNewPet() {
                         </IconButton>
                       </Tooltip>
                       <Tooltip title="View details">
-                        <IconButton color="info" sx={{ bgcolor: "#e1f5fe" }}>
+                        <IconButton
+                          color="info"
+                          sx={{ bgcolor: "#e1f5fe" }}
+                          onClick={() => onClickDetailHandle(pet._id)}
+                        >
                           <VisibilityIcon />
                         </IconButton>
                       </Tooltip>

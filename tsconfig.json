@@ -9,7 +9,6 @@
     "jsx": "react-jsx",
     "moduleResolution": "node",
     "esModuleInterop": true,
-    "skipLibCheck": true,
-    "allowSyntheticDefaultImports": true
+    "skipLibCheck": true
   }
 }
