@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Box, Typography, IconButton } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/Remove";
+import DeleteIcon from "@mui/icons-material/Delete";
 
 interface CartItemProps {
   id: string;
@@ -11,18 +12,21 @@ interface CartItemProps {
   initialQuantity: number;
   check: boolean;
   onQuantityChange: (newQuantity: number) => void;
+  onDelete: () => void;
 }
 
 const CartItem = ({
-  id,
   imageUrl,
   name,
   price,
   initialQuantity,
-  check,
   onQuantityChange,
+  onDelete,
 }: CartItemProps) => {
   const [quantity, setQuantity] = useState(initialQuantity);
+  useEffect(() => {
+    setQuantity(initialQuantity);
+  }, [initialQuantity]);
 
   const handleIncrease = () => {
     const newQuantity = quantity + 1;
@@ -90,6 +94,9 @@ const CartItem = ({
           </Typography>
           <IconButton onClick={handleIncrease} sx={{ padding: 0 }}>
             <AddIcon />
+          </IconButton>
+          <IconButton onClick={onDelete} sx={{ padding: 0, ml: 2 }}>
+            <DeleteIcon />
           </IconButton>
         </Box>
       </Box>

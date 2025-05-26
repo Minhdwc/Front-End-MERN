@@ -6,6 +6,7 @@ import userReducer from "@/store/services/user/userSlice";
 import categoryReducer from "@/store/services/category/categorySlice";
 import petReducer from "@/store/services/pet/petSlice";
 import cartReducer from '@/store/services/cart/cartSlice';
+import orderReducer from '@/store/model/orderSlice';
 import storage from 'redux-persist/lib/storage';
 import { persistReducer, persistStore } from 'redux-persist';
 
@@ -20,6 +21,7 @@ const rootReducer = combineReducers({
   category: categoryReducer,
   pet: petReducer,
   cart: cartReducer,
+  order: orderReducer,
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);

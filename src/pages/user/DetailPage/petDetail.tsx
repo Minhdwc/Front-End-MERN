@@ -1,3 +1,9 @@
+import { PetInterface } from "@/store/model/pet";
+import {
+  addItemToCart,
+  getCartByUserId,
+} from "@/store/services/cart/cartSlice";
+import { AppDispatch, RootState } from "@/store/store";
 import {
   Box,
   Typography,
@@ -8,9 +14,50 @@ import {
   Paper,
 } from "@mui/material";
 import { Card as AntCard, Tag } from "antd";
+import { Toaster, toast } from "react-hot-toast";
+import { useDispatch, useSelector } from "react-redux";
+import { useLocation, useNavigate } from "react-router-dom";
+import CustomButton from "@/components/UI/Button/Button";
 const { Meta } = AntCard;
 
-export default function PetDetail({ pet }) {
+export default function PetDetail({ pet }: { pet: PetInterface }) {
+  const dispatch = useDispatch<AppDispatch>();
+  const user = useSelector((state: RootState) => state.user);
+  const navigate = useNavigate();
+  const location = useLocation();
+  const onClickAddToCart = async (pet: PetInterface) => {
+    if (!localStorage.getItem("accessToken")) {
+      navigate("/auth/login", { state: { from: location.pathname } });
+      return;
+    }
+
+    if (!user.userInfo?.data?.data._id) {
+      console.log(
+        "User information not available. Please try logging in again."
+      );
+      return;
+    }
+
+    try {
+      const idUser = user.userInfo.data.data._id;
+      const result = await dispatch(
+        addItemToCart({ userId: idUser, pet })
+      ).unwrap();
+
+      if (result) {
+        await dispatch(getCartByUserId(idUser));
+        toast.success("✅ Pet added to cart!", {
+          position: "top-right",
+          duration: 3000,
+        });
+      }
+    } catch (err: any) {
+      toast.error(
+        err.message || "Failed to add pet to cart. Please try again."
+      );
+      console.error("Add to cart error:", err);
+    }
+  };
   if (!pet) return <Typography>No pet found</Typography>;
 
   return (
@@ -20,6 +67,7 @@ export default function PetDetail({ pet }) {
       my={2}
       sx={{ backgroundColor: "#f7f9fc" }}
     >
+      <Toaster />
       <Grid container spacing={4}>
         <Grid item xs={12} md={5}>
           <AntCard
@@ -34,12 +82,6 @@ export default function PetDetail({ pet }) {
                     height: "400px",
                     width: "100%",
                     transition: "transform 0.3s ease",
-                  }}
-                  onMouseOver={(e) => {
-                    e.currentTarget.style.transform = "scale(1.03)";
-                  }}
-                  onMouseOut={(e) => {
-                    e.currentTarget.style.transform = "scale(1)";
                   }}
                 />
               </Box>
@@ -215,33 +257,15 @@ export default function PetDetail({ pet }) {
                 </Grid>
               </Grid>
             </Box>
-
-            <Box mt={4} sx={{ textAlign: "center" }}>
-              <button
-                style={{
-                  backgroundColor: "#3f51b5",
-                  color: "white",
-                  border: "none",
-                  padding: "10px 24px",
-                  borderRadius: "30px",
-                  fontWeight: "bold",
-                  cursor: "pointer",
-                  transition: "all 0.3s ease",
-                  boxShadow: "0 4px 12px rgba(63, 81, 181, 0.2)",
-                }}
-                onMouseOver={(e) => {
-                  e.currentTarget.style.backgroundColor = "#303f9f";
-                  e.currentTarget.style.boxShadow =
-                    "0 6px 14px rgba(63, 81, 181, 0.3)";
-                }}
-                onMouseOut={(e) => {
-                  e.currentTarget.style.backgroundColor = "#3f51b5";
-                  e.currentTarget.style.boxShadow =
-                    "0 4px 12px rgba(63, 81, 181, 0.2)";
-                }}
-              >
-                Liên hệ về {pet.name}
-              </button>
+            <Box
+              mt={4}
+              sx={{ display: "flex", justifyContent: "space-around" }}
+            >
+              <CustomButton text="Tư vấn thông tin" />
+              <CustomButton
+                text="Thêm vào giỏ hàng"
+                handleOnclick={() => onClickAddToCart(pet)}
+              />
             </Box>
           </Paper>
         </Grid>

@@ -1,6 +1,6 @@
 import Logo from "@/components/UI/Logo/Logo";
 import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "@/store/store";
+import { RootState, AppDispatch } from "@/store/store";
 import { Box, Typography, AppBar, IconButton } from "@mui/material";
 import {
   BellOutlined,
@@ -16,14 +16,14 @@ import { getCartByUserId } from "@/store/services/cart/cartSlice";
 import CartDrawer from "@/components/UI/Cart/CartDrawer";
 
 const HeaderComponent = () => {
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
   const { userInfo } = useSelector((state: RootState) => state.user);
   const { cart } = useSelector((state: RootState) => state.cart);
   useEffect(() => {
-    if (userInfo?.data) {
-      dispatch(getCartByUserId(userInfo.data._id));
+    if (userInfo?.data?._id) {
+      dispatch(getCartByUserId(userInfo?.data?._id));
     }
-  }, [userInfo, cart?.item?.length]);
+  }, [userInfo?.data?._id, cart?.item?.length]);
   const totalQuantity = (cart?.item || []).reduce(
     (acc, item) => acc + item.quantity,
     0

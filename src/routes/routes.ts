@@ -12,12 +12,12 @@ const forgotPasswordPage = React.lazy(
 );
 
 //Page of admin
-const dashboardAdminPage = React.lazy(() => import("../pages/admin/dashboard"));
+const dashboardAdminPage = React.lazy(() => import("@/pages/admin/dashboard"));
 
 //Page of user
-const homePage = React.lazy(() => import("../pages/user/HomePage/home"));
-const detailPage = React.lazy(() => import("../pages/user/DetailPage/detail"));
-
+const homePage = React.lazy(() => import("@/pages/user/HomePage/home"));
+const detailPage = React.lazy(() => import("@/pages/user/DetailPage/detail"));
+const orderPage = React.lazy(() => import("@/pages/user/Order/Order"));
 export interface Route {
   path: string;
   element: any;
@@ -31,6 +31,12 @@ export const routes: Route[] = [
   {
     path: "/detail/:id",
     element: detailPage,
+    isShowHeader: true,
+    isAdmin: false,
+  },
+  {
+    path: "/order",
+    element: orderPage,
     isShowHeader: true,
     isAdmin: false,
   },

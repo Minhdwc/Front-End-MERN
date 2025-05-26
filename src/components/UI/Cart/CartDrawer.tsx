@@ -1,22 +1,30 @@
 import { useEffect, useState } from "react";
-import { Box, Typography, CircularProgress } from "@mui/material";
+import { Box, CircularProgress } from "@mui/material";
 import { Button, Divider, Empty } from "antd";
 import { MdPaid, MdCancel } from "react-icons/md";
 import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "@/store/store";
+import { RootState, AppDispatch } from "@/store/store";
 import authorizedAxiosInstance from "@/ultils/authorAxios";
 import CartItem from "./CartItem";
 import { deleteCart, deleteItemInCart } from "@/store/services/cart/cartSlice";
+import { ItemCartInteface } from "@/store/model/cart";
 
 const CartDrawer = () => {
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
   const { cart } = useSelector((state: RootState) => state.cart);
   const [productData, setProductData] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
 
-  const fetchDataProduct = async (id: string, isPet: boolean) => {
+  const fetchDataProduct = async (id: string, type: string) => {
     try {
-      const url = isPet ? `/pet/get/d=${id}` : `/product/get/d=${id}`;
+      var url = "";
+      if (type === "Pet") {
+        url = `/pet/get/d=${id}`;
+      } else if (type === "Accessory") {
+        url = `/accessory/get/d=${id}`;
+      } else {
+        url = `/food/get/d=${id}`;
+      }
       const response = await authorizedAxiosInstance.get(url);
       return response.data;
     } catch (error) {
@@ -26,16 +34,33 @@ const CartDrawer = () => {
   };
 
   const loadProductData = async () => {
+    if (!cart?.item) return;
+
     setLoading(true);
-    const data = await Promise.all(
-      (cart?.item || []).map(async (item) => {
-        const id = item.idProduct || item.idPet;
-        const isPet = !!item.idPet;
-        return await fetchDataProduct(id, isPet);
-      })
-    );
-    setProductData(data.filter((item) => item !== null));
-    setLoading(false);
+    const productPromises = cart.item.map(async (item: ItemCartInteface) => {
+      const id = item.itemId;
+      const type = item.itemType;
+
+      if (!type) {
+        console.error("Item type is missing:", item);
+        return null;
+      }
+
+      return fetchDataProduct(id, type);
+    });
+
+    try {
+      const data = await Promise.all(productPromises);
+      setProductData(
+        data.filter(
+          (item: any): item is NonNullable<typeof item> => item !== null
+        )
+      );
+    } catch (error) {
+      console.error("Error loading product data:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -46,14 +71,21 @@ const CartDrawer = () => {
     }
   }, [cart?.item]);
 
-  const handleDeleteItem = (id: string) => {
-    dispatch(deleteItemInCart({ userId: cart?.userId ?? "", id }));
+  const handleDeleteItem = (
+    id: string,
+    itemType: "Pet" | "Food" | "Accessory"
+  ) => {
+    if (!cart?.userId) return;
+    dispatch(deleteItemInCart({ userId: cart.userId, id, itemType }));
   };
 
   const handleRemoveAll = () => {
+    if (!cart?._id) return;
     dispatch(deleteCart({ id: cart._id }));
     setProductData([]);
   };
+
+  const handleOrder = () => {};
 
   return (
     <Box
@@ -94,14 +126,21 @@ const CartDrawer = () => {
               imageUrl={product.data.image}
               name={product.data.name}
               price={product.data.price}
-              initialQuantity={cart.item[index]?.quantity}
+              initialQuantity={cart?.item?.[index]?.quantity || 0}
               onQuantityChange={(newQuantity) => {
                 console.log(
                   `Quantity for ${product.data.name} changed to ${newQuantity}`
                 );
               }}
               onDelete={() =>
-                handleDeleteItem(product.data.idPet || product.data.idProduct)
+                handleDeleteItem(
+                  product.data.idPet || product.data.idProduct,
+                  product.data.idPet
+                    ? "Pet"
+                    : product.data.idProduct.startsWith("food_")
+                    ? "Food"
+                    : "Accessory"
+                )
               }
             />
           ))
@@ -128,7 +167,7 @@ const CartDrawer = () => {
           style={{ flex: 1, marginRight: 8 }}
           disabled={productData.length === 0}
         >
-          Checkout
+          Đặt hàng
         </Button>
         <Button
           danger
@@ -137,7 +176,7 @@ const CartDrawer = () => {
           disabled={productData.length === 0}
           onClick={handleRemoveAll}
         >
-          Remove all
+          Xóa giỏ hàng
         </Button>
       </Box>
     </Box>

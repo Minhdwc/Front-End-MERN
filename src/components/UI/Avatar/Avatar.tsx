@@ -1,6 +1,6 @@
 import { Tooltip, Avatar } from "antd";
 import { Menu, Box, IconButton, Typography, MenuItem } from "@mui/material";
-import React, { useState } from "react";
+import { useState } from "react";
 import { FaRegUser } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
@@ -22,8 +22,7 @@ const AvatarComponent = () => {
   const [anchorElUser, setAnchorElUser] = useState<null | HTMLElement>(null);
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const user = useSelector((state: RootState) => state.user.userInfo);
-  useSelector((state: RootState) => state.cart.cart);
+  const { data } = useSelector((state: RootState) => state.user.userInfo);
 
   const handleOpenMenu = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorElUser(event.currentTarget);
@@ -51,8 +50,8 @@ const AvatarComponent = () => {
     <Box>
       <Tooltip title="Account">
         <IconButton onClick={handleOpenMenu} sx={{ p: 0 }}>
-          {user?.data ? (
-            <Avatar alt="User" src={user.data.image} />
+          {data?.data ? (
+            <Avatar alt="User" src={data.data.image} />
           ) : (
             <FaRegUser style={{ fontSize: 24, color: "#000" }} />
           )}
@@ -64,7 +63,7 @@ const AvatarComponent = () => {
         open={Boolean(anchorElUser)}
         onClose={handleCloseMenu}
       >
-        {(user ? menuLoggedIn : menuNotLoggedIn).map(({ name, url }) => (
+        {(data?.data ? menuLoggedIn : menuNotLoggedIn).map(({ name, url }) => (
           <MenuItem key={name} onClick={() => handleChooseItemMenu(url)}>
             <Typography textAlign="center">{name}</Typography>
           </MenuItem>

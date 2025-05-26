@@ -10,31 +10,33 @@ import "slick-carousel/slick/slick-theme.css";
 
 function App() {
   return (
-    <Router>
-      <Routes>
-        {routes.map((route: any, index: number) => (
-          <Route
-            key={index}
-            path={route.path}
-            element={
-              route.isAdmin ? (
-                <DefaultLayoutAdmin>
-                  <route.element />
-                </DefaultLayoutAdmin>
-              ) : route.isShowHeader ? (
-                <DefaultLayout>
-                  <route.element />
-                </DefaultLayout>
-              ) : (
-                <DefaultMainLayout>
-                  <route.element />
-                </DefaultMainLayout>
-              )
-            }
-          />
-        ))}
-      </Routes>
-    </Router>
+    <>
+      <Router>
+        <Routes>
+          {routes.map((route: any, index: number) => (
+            <Route
+              key={index}
+              path={route.path}
+              element={
+                route.isAdmin ? (
+                  <DefaultLayoutAdmin>
+                    <route.element />
+                  </DefaultLayoutAdmin>
+                ) : route.isShowHeader ? (
+                  <DefaultLayout>
+                    <route.element />
+                  </DefaultLayout>
+                ) : (
+                  <DefaultMainLayout>
+                    <route.element />
+                  </DefaultMainLayout>
+                )
+              }
+            />
+          ))}
+        </Routes>
+      </Router>
+    </>
   );
 }
 
