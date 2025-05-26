@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import authorizedAxiosInstance from "@/ultils/authorAxios";
+import { searchAddress } from "@/api/openStreetMaps";
 import AddressSearch from "./AddressSearch";
 import AddressResult from "./AddressResult";
 import AddressModal from "./AddressModal";
@@ -16,24 +16,14 @@ export default function AddressPicker({
   const [loading, setLoading] = useState(false);
   const debounceRef = useRef<NodeJS.Timeout | null>(null);
 
-  const fetchResults = async (query: string) => {
-    if (!query.trim()) return;
+  const fetchResults = async (address: string) => {
+    if (!address.trim()) return;
     setLoading(true);
     try {
-      const res = await authorizedAxiosInstance.get(
-        `https://nominatim.openstreetmap.org/search`,
-        {
-          params: {
-            q: query,
-            format: "json",
-            addressdetails: 1,
-            limit: 5,
-          },
-        }
-      );
-      setResults(res.data);
+      const data = await searchAddress(address, { limit: 5 });
+      setResults(data);
     } catch (err) {
-      console.error("Search failed:", err);
+      console.log("Error", err);
     } finally {
       setLoading(false);
     }
@@ -81,12 +71,14 @@ export default function AddressPicker({
         loading={loading}
       />
       <AddressResult results={results} onSelect={handleSelect} />
-      <AddressModal
-        selected={selected}
-        open={open}
-        onCancel={() => setOpen(false)}
-        onConfirm={confirmAddress}
-      />
+      {open && (
+        <AddressModal
+          selected={selected}
+          open={open}
+          onCancel={() => setOpen(false)}
+          onConfirm={confirmAddress}
+        />
+      )}
     </div>
   );
 }

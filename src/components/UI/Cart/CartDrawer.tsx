@@ -8,9 +8,11 @@ import authorizedAxiosInstance from "@/ultils/authorAxios";
 import CartItem from "./CartItem";
 import { deleteCart, deleteItemInCart } from "@/store/services/cart/cartSlice";
 import { ItemCartInteface } from "@/store/model/cart";
+import { useNavigate } from "react-router-dom";
 
 const CartDrawer = () => {
   const dispatch = useDispatch<AppDispatch>();
+  const navigate = useNavigate();
   const { cart } = useSelector((state: RootState) => state.cart);
   const [productData, setProductData] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
@@ -85,7 +87,9 @@ const CartDrawer = () => {
     setProductData([]);
   };
 
-  const handleOrder = () => {};
+  const handleOrder = () => {
+    navigate("/order");
+  };
 
   return (
     <Box
@@ -166,6 +170,7 @@ const CartDrawer = () => {
           icon={<MdPaid />}
           style={{ flex: 1, marginRight: 8 }}
           disabled={productData.length === 0}
+          onClick={handleOrder}
         >
           Đặt hàng
         </Button>

@@ -1,14 +1,14 @@
-import React from "react";
+import * as React from "react";
 //Page not found
 const notFoundPage = React.lazy(
   () => import("@/pages/notFoundPage/notFoundPage")
 );
 
 //Page of authentication
-const loginPage = React.lazy(() => import("../pages/auth/login"));
-const registerPage = React.lazy(() => import("../pages/auth/register"));
+const loginPage = React.lazy(() => import("@/pages/auth/Login/login"));
+const registerPage = React.lazy(() => import("@/pages/auth/Register/register"));
 const forgotPasswordPage = React.lazy(
-  () => import("../pages/auth/forgotPassword")
+  () => import("@/pages/auth/ForgotPassword/forgotPassword")
 );
 
 //Page of admin

@@ -42,9 +42,7 @@ export function SlideNewPet() {
     }
 
     if (!user.userInfo?.data?.data._id) {
-      console.log(
-        "User information not available. Please try logging in again."
-      );
+      console.log("Người dùng không hợp lệ");
       return;
     }
 
@@ -56,16 +54,13 @@ export function SlideNewPet() {
 
       if (result) {
         await dispatch(getCartByUserId(idUser));
-        toast.success("✅ Pet added to cart!", {
+        toast.success("✅ Đã thêm vào giỏ hàng", {
           position: "top-right",
           duration: 3000,
         });
       }
     } catch (err: any) {
-      toast.error(
-        err.message || "Failed to add pet to cart. Please try again."
-      );
-      console.error("Add to cart error:", err);
+      toast.error(err.message);
     }
   };
   const onClickDetailHandle = async (id: string) => {

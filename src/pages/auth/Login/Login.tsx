@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { getUsers } from "@/store/services/user/userSlice";
-import { RootState, AppDispatch } from "@/store/store";
+import { AppDispatch } from "@/store/store";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Form, Input, message } from "antd";
@@ -95,9 +95,7 @@ const Login = () => {
             <Form layout="vertical" onFinish={onFinish}>
               <Form.Item
                 name="email"
-                rules={[
-                  { required: true, message: "Please enter your email!" },
-                ]}
+                rules={[{ required: true, message: "Vui lòng nhập email!!" }]}
               >
                 <Input
                   prefix={<MailOutlined style={{ color: "#FF8A65" }} />}
@@ -112,9 +110,7 @@ const Login = () => {
 
               <Form.Item
                 name="password"
-                rules={[
-                  { required: true, message: "Please enter your password!" },
-                ]}
+                rules={[{ required: true, message: "Vui lòng nhập mật khẩu" }]}
               >
                 <Input.Password
                   prefix={<LockOutlined style={{ color: "#FF8A65" }} />}

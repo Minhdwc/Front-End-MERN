@@ -17,17 +17,17 @@ authorizedAxiosInstance.interceptors.request.use(
     }
     return config;
   },
-  function (error) {
+  function (error:any) {
     return Promise.reject(error);
   }
 );
 
 // Add a response interceptor
 authorizedAxiosInstance.interceptors.response.use(
-  function (response) {
+  function (response:any) {
     return response;
   },
-  function (error) {
+  function (error:any) {
     if (error.response?.status === 401) {
       console.log(error.message);
     }
