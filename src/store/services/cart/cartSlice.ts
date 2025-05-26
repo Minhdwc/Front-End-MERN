@@ -265,7 +265,7 @@ const cartSlice = createSlice({
       .addCase(deleteItemInCart.fulfilled, (state, action) => {
         state.cart = action.payload;
       })
-      .addCase(deleteCart.fulfilled, (state, action) => {
+      .addCase(deleteCart.fulfilled, (state) => {
         state.cart = null;
         state.loading = false;
         state.error = null;

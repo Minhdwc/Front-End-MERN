@@ -3,7 +3,10 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState, AppDispatch } from "@/store/store";
 import { getAllPet } from "@/store/services/pet/petSlice";
-import { addItemToCart } from "@/store/services/cart/cartSlice";
+import {
+  addItemToCart,
+  getCartByUserId,
+} from "@/store/services/cart/cartSlice";
 import {
   Typography,
   Card as MUICard,
@@ -37,16 +40,32 @@ export function SlideNewPet() {
       navigate("/auth/login", { state: { from: location.pathname } });
       return;
     }
-    try {
-      const idUser = user.userInfo.data._id;
-      await dispatch(addItemToCart({ userId: idUser, pet }));
 
-      toast.success("✅ Pet added to cart!", {
-        position: "top-right",
-        duration: 3000,
-      });
+    if (!user.userInfo?.data?.data._id) {
+      console.log(
+        "User information not available. Please try logging in again."
+      );
+      return;
+    }
+
+    try {
+      const idUser = user.userInfo.data.data._id;
+      const result = await dispatch(
+        addItemToCart({ userId: idUser, pet })
+      ).unwrap();
+
+      if (result) {
+        await dispatch(getCartByUserId(idUser));
+        toast.success("✅ Pet added to cart!", {
+          position: "top-right",
+          duration: 3000,
+        });
+      }
     } catch (err: any) {
-      console.log(err.message);
+      toast.error(
+        err.message || "Failed to add pet to cart. Please try again."
+      );
+      console.error("Add to cart error:", err);
     }
   };
   const onClickDetailHandle = async (id: string) => {
