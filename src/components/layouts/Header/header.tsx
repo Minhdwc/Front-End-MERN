@@ -1,7 +1,15 @@
 import Logo from "@/components/UI/Logo/Logo";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState, AppDispatch } from "@/store/store";
-import { Box, Typography, AppBar, IconButton } from "@mui/material";
+import {
+  Box,
+  Typography,
+  AppBar,
+  IconButton,
+  Badge,
+  Toolbar,
+  useMediaQuery,
+} from "@mui/material";
 import {
   BellOutlined,
   SearchOutlined,
@@ -19,43 +27,82 @@ const HeaderComponent = () => {
   const dispatch = useDispatch<AppDispatch>();
   const { userInfo } = useSelector((state: RootState) => state.user);
   const { cart } = useSelector((state: RootState) => state.cart);
+  const isMobile = useMediaQuery("(max-width: 768px)");
+
   useEffect(() => {
-    if (userInfo?.data?._id) {
-      dispatch(getCartByUserId(userInfo?.data?._id));
+    const userId = (userInfo?.data as any)?._id;
+    if (userId) {
+      dispatch(getCartByUserId(userId));
     }
-  }, [userInfo?.data?._id, cart?.item?.length]);
+  }, [(userInfo?.data as any)?._id, cart?.item?.length]);
   const totalQuantity = (cart?.item || []).reduce(
     (acc, item) => acc + item.quantity,
     0
   );
   return (
-    <AppBar position="sticky" elevation={0} sx={{ backgroundColor: "white" }}>
-      <Box className="bg-amber-500 text-center py-1">
+    <AppBar
+      position="sticky"
+      elevation={2}
+      sx={{
+        backgroundColor: "#fff",
+        borderBottom: "1px solid #f0f0f0",
+        boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
+      }}
+    >
+      {/* Banner */}
+      <Box
+        sx={{
+          background: "linear-gradient(90deg, #fbbf24 0%, #f59e42 100%)",
+          textAlign: "center",
+          py: 1,
+        }}
+      >
         <Typography color="white" fontSize={16} fontWeight="bold">
           Pet is my friend 🐶🐱
         </Typography>
       </Box>
-      <Box className="flex justify-between items-center py-2 px-3">
-        <Logo image="/logo.png" />
-
-        <Box className="hidden md:flex">
-          <MenuComponent />
+      {/* Main Header */}
+      <Toolbar
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          py: 1,
+        }}
+      >
+        {/* Logo */}
+        <Box sx={{ display: "flex", alignItems: "center" }}>
+          <Logo image="/logo.png" />
         </Box>
 
-        <Box className="flex items-center gap-3">
+        {/* Menu (ẩn ở mobile) */}
+        {!isMobile && (
+          <Box sx={{ flex: 1, display: "flex", justifyContent: "center" }}>
+            <MenuComponent />
+          </Box>
+        )}
+
+        {/* Icon group */}
+        <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
           <IconButton color="default">
             <SearchOutlined />
           </IconButton>
           <AvatarComponent />
           <CustomIcon icon={<HeartOutlined />} content="Wishlist" />
           <CustomIcon icon={<BellOutlined />} content="Notifications" />
-          <CustomIcon
-            icon={<ShoppingCartOutlined />}
-            content={<CartDrawer />}
-            number={totalQuantity}
-          />
+          <Badge
+            badgeContent={totalQuantity}
+            color="error"
+            overlap="circular"
+            anchorOrigin={{ vertical: "top", horizontal: "right" }}
+          >
+            <CustomIcon
+              icon={<ShoppingCartOutlined />}
+              content={<CartDrawer />}
+            />
+          </Badge>
         </Box>
-      </Box>
+      </Toolbar>
     </AppBar>
   );
 };

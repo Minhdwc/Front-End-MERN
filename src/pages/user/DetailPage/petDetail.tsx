@@ -17,7 +17,7 @@ import { Card as AntCard, Tag } from "antd";
 import { Toaster, toast } from "react-hot-toast";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
-import CustomButton from "@/components/UI/Button/Button";
+import CustomButton from "@/components/UI/Button/button";
 const { Meta } = AntCard;
 
 export default function PetDetail({ pet }: { pet: PetInterface }) {
@@ -27,7 +27,12 @@ export default function PetDetail({ pet }: { pet: PetInterface }) {
   const location = useLocation();
   const onClickAddToCart = async (pet: PetInterface) => {
     if (!localStorage.getItem("accessToken")) {
-      navigate("/auth/login", { state: { from: location.pathname } });
+      navigate("/auth/login", {
+        state: {
+          from: location.pathname,
+          pet: pet,
+        },
+      });
       return;
     }
 

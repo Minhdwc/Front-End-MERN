@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { getUsers } from "@/store/services/user/userSlice";
 import { AppDispatch } from "@/store/store";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Form, Input, message } from "antd";
 import { MailOutlined, LockOutlined } from "@ant-design/icons";
@@ -18,6 +18,11 @@ import { alpha } from "@mui/material/styles";
 import authorizedAxiosInstance from "@/ultils/authorAxios";
 import { UserInterface } from "@/store/model/user";
 import "@/components/sass/login.sass";
+import {
+  addItemToCart,
+  getCartByUserId,
+} from "@/store/services/cart/cartSlice";
+import { PetInterface } from "@/store/model/pet";
 
 interface LoginResponse {
   accessToken: string;
@@ -26,8 +31,11 @@ interface LoginResponse {
 
 const Login = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [loadingAction, setLoadingAction] = useState(false);
   const dispatch = useDispatch<AppDispatch>();
+  const from = location.state?.from || "/";
+  const pet = location.state?.pet as PetInterface;
 
   const onFinish = async (values: { email: string; password: string }) => {
     setLoadingAction(true);
@@ -43,11 +51,19 @@ const Login = () => {
       }
 
       localStorage.setItem("accessToken", accessToken);
+      await dispatch(getUsers());
 
-      dispatch(getUsers());
+      if (pet) {
+        const userInfo = await dispatch(getUsers()).unwrap();
+        if (userInfo?.data?._id) {
+          await dispatch(addItemToCart({ userId: userInfo.data._id, pet }));
+          await dispatch(getCartByUserId(userInfo.data._id));
+          message.success("✅ Đã thêm vào giỏ hàng");
+        }
+      }
 
       message.success("Login successful!");
-      navigate("/");
+      navigate(from);
     } catch (error: any) {
       message.error(
         error.response?.data?.message || "Invalid email or password!"

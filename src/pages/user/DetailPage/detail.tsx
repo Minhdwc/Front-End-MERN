@@ -2,7 +2,6 @@ import authorizedAxiosInstance from "@/ultils/authorAxios";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import PetDetail from "./petDetail";
-// import ProductDetail from "./productDetail";
 
 const Detail = () => {
   const param = useParams<{ id: string }>();
@@ -35,9 +34,6 @@ const Detail = () => {
       {param.id?.startsWith("pet_") && detailData && (
         <PetDetail pet={detailData} />
       )}
-      {/* {param.id?.startsWith("product_") && detailData && (
-        // <ProductDetail product={detailData} />
-      )} */}
     </div>
   );
 };

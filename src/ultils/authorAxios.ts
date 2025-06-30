@@ -4,7 +4,6 @@ const authorizedAxiosInstance = axios.create({
   baseURL: import.meta.env.VITE_BACKEND_URL,
 });
 
-
 authorizedAxiosInstance.interceptors.request.use(
   function (config: any) {
     const accessToken = localStorage.getItem("accessToken");
@@ -17,17 +16,16 @@ authorizedAxiosInstance.interceptors.request.use(
     }
     return config;
   },
-  function (error:any) {
+  function (error: any) {
     return Promise.reject(error);
   }
 );
 
-// Add a response interceptor
 authorizedAxiosInstance.interceptors.response.use(
-  function (response:any) {
+  function (response: any) {
     return response;
   },
-  function (error:any) {
+  function (error: any) {
     if (error.response?.status === 401) {
       console.log(error.message);
     }

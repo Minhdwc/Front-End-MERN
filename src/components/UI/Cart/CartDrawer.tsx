@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import { Box, CircularProgress } from "@mui/material";
 import { Button, Divider, Empty } from "antd";
 import { MdPaid, MdCancel } from "react-icons/md";
@@ -6,20 +6,29 @@ import { useDispatch, useSelector } from "react-redux";
 import { RootState, AppDispatch } from "@/store/store";
 import authorizedAxiosInstance from "@/ultils/authorAxios";
 import CartItem from "./CartItem";
-import { deleteCart, deleteItemInCart } from "@/store/services/cart/cartSlice";
-import { ItemCartInteface } from "@/store/model/cart";
+import {
+  deleteCart,
+  deleteItemInCart,
+  getCartByUserId,
+  increaseQuantity,
+  decreaseQuantity,
+} from "@/store/services/cart/cartSlice";
 import { useNavigate } from "react-router-dom";
+import { Typography } from "@mui/material";
 
 const CartDrawer = () => {
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
-  const { cart } = useSelector((state: RootState) => state.cart);
+  const cart = useSelector((state: RootState) => state.cart.cart);
   const [productData, setProductData] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
+  const [itemQuantities, setItemQuantities] = useState<{
+    [itemId: string]: number;
+  }>({});
 
   const fetchDataProduct = async (id: string, type: string) => {
     try {
-      var url = "";
+      let url = "";
       if (type === "Pet") {
         url = `/pet/get/d=${id}`;
       } else if (type === "Accessory") {
@@ -30,66 +39,137 @@ const CartDrawer = () => {
       const response = await authorizedAxiosInstance.get(url);
       return response.data;
     } catch (error) {
-      console.error("Failed to fetch product:", error);
+      console.error("Error fetching product:", error);
       return null;
     }
   };
 
-  const loadProductData = async () => {
-    if (!cart?.item) return;
-
-    setLoading(true);
-    const productPromises = cart.item.map(async (item: ItemCartInteface) => {
-      const id = item.itemId;
-      const type = item.itemType;
-
-      if (!type) {
-        console.error("Item type is missing:", item);
-        return null;
-      }
-
-      return fetchDataProduct(id, type);
-    });
-
-    try {
-      const data = await Promise.all(productPromises);
-      setProductData(
-        data.filter(
-          (item: any): item is NonNullable<typeof item> => item !== null
-        )
-      );
-    } catch (error) {
-      console.error("Error loading product data:", error);
-    } finally {
-      setLoading(false);
+  useEffect(() => {
+    if (!cart?.item || cart.item.length === 0) {
+      setProductData([]);
+      return;
     }
-  };
+    setLoading(true);
+    const fetchAllProducts = async () => {
+      try {
+        const productPromises = cart.item.map((item) => {
+          const id = item.itemId;
+          const type = item.itemType;
+          return fetchDataProduct(id, type);
+        });
+        const results = await Promise.all(productPromises);
+        setProductData(results.filter((result: any) => result !== null));
+      } catch (error) {
+        console.error("Error fetching products:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchAllProducts();
+  }, [cart?.item]);
 
   useEffect(() => {
-    if (cart?.item?.length) {
-      loadProductData();
-    } else {
-      setProductData([]);
+    if (cart?.item) {
+      const newQuantities: { [itemId: string]: number } = {};
+      cart.item.forEach((item) => {
+        newQuantities[item._id] = item.quantity;
+      });
+      setItemQuantities(newQuantities);
     }
   }, [cart?.item]);
 
-  const handleDeleteItem = (
+  const handleDeleteItem = async (
     id: string,
     itemType: "Pet" | "Food" | "Accessory"
   ) => {
     if (!cart?.userId) return;
-    dispatch(deleteItemInCart({ userId: cart.userId, id, itemType }));
+    try {
+      const result = await dispatch(
+        deleteItemInCart({ userId: cart.userId, id, itemType })
+      ).unwrap();
+      if (result) {
+        dispatch(getCartByUserId(cart.userId));
+      }
+    } catch (error) {
+      console.error("Failed to delete item:", error);
+    }
   };
 
-  const handleRemoveAll = () => {
-    if (!cart?._id) return;
-    dispatch(deleteCart({ id: cart._id }));
-    setProductData([]);
+  const handleQuantityChange = () => {
+    if (cart?.userId) {
+      dispatch(getCartByUserId(cart.userId));
+    }
   };
 
-  const handleOrder = () => {
-    navigate("/order");
-  };
+  const handleIncrease = useCallback(
+    (itemId: string) => {
+      if (!cart?.userId) return;
+      const item = cart.item.find((i) => i._id === itemId);
+      if (!item) return;
+      dispatch(
+        increaseQuantity({
+          userId: cart.userId,
+          idItem: itemId,
+          itemType: item.itemType,
+        })
+      );
+      setItemQuantities((q) => ({ ...q, [itemId]: (q[itemId] || 1) + 1 }));
+    },
+    [cart?.userId, cart?.item]
+  );
+
+  const handleDecrease = useCallback(
+    (itemId: string) => {
+      if (!cart?.userId) return;
+      const item = cart.item.find((i) => i._id === itemId);
+      if (!item || itemQuantities[itemId] <= 1) return;
+      dispatch(
+        decreaseQuantity({
+          userId: cart.userId,
+          idItem: itemId,
+          itemType: item.itemType,
+        })
+      );
+      setItemQuantities((q) => ({ ...q, [itemId]: q[itemId] - 1 }));
+    },
+    [cart?.userId, cart?.item, itemQuantities]
+  );
+
+  console.log("cha bị rerender");
+  const cartItems = useMemo(() => {
+    if (!cart?.item || !productData.length) return null;
+
+    return cart.item.map((item) => {
+      const product = productData.find(
+        (p) => p?.data?._id?.toString() === item.itemId?.toString()
+      );
+      if (!product) return null;
+
+      return (
+        <CartItem
+          key={`${item.itemType}-${item.itemId}`}
+          id={item.itemId}
+          idItem={item._id}
+          imageUrl={product.data.image}
+          name={product.data.name}
+          price={product.data.price}
+          userId={cart.userId}
+          itemType={item.itemType}
+          onUpdate={() => dispatch(getCartByUserId(cart.userId))}
+          quantity={itemQuantities[item._id] || item.quantity}
+          onIncrease={handleIncrease}
+          onDecrease={handleDecrease}
+        />
+      );
+    });
+  }, [
+    cart?.item,
+    productData,
+    cart?.userId,
+    itemQuantities,
+    handleIncrease,
+    handleDecrease,
+  ]);
 
   return (
     <Box
@@ -100,8 +180,18 @@ const CartDrawer = () => {
         backgroundColor: "#fafafa",
       }}
     >
-      <Divider>Cart</Divider>
-
+      <Box
+        sx={{
+          p: 2,
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          borderBottom: "1px solid #e0e0e0",
+          backgroundColor: "#fff",
+        }}
+      >
+        <Typography variant="h6">Giỏ hàng</Typography>
+      </Box>
       <Box
         sx={{
           flex: 1,
@@ -122,37 +212,11 @@ const CartDrawer = () => {
             <CircularProgress />
           </Box>
         ) : productData.length > 0 ? (
-          productData.map((product, index) => (
-            <CartItem
-              key={index}
-              id={product.data.idPet || product.data.idProduct}
-              check={!!product.data.idPet}
-              imageUrl={product.data.image}
-              name={product.data.name}
-              price={product.data.price}
-              initialQuantity={cart?.item?.[index]?.quantity || 0}
-              onQuantityChange={(newQuantity) => {
-                console.log(
-                  `Quantity for ${product.data.name} changed to ${newQuantity}`
-                );
-              }}
-              onDelete={() =>
-                handleDeleteItem(
-                  product.data.idPet || product.data.idProduct,
-                  product.data.idPet
-                    ? "Pet"
-                    : product.data.idProduct.startsWith("food_")
-                    ? "Food"
-                    : "Accessory"
-                )
-              }
-            />
-          ))
+          cartItems
         ) : (
-          <Empty description="No items in cart" />
+          <Empty description="Bạn chưa có sản phẩm" />
         )}
       </Box>
-
       <Box
         sx={{
           p: 2,
@@ -170,7 +234,7 @@ const CartDrawer = () => {
           icon={<MdPaid />}
           style={{ flex: 1, marginRight: 8 }}
           disabled={productData.length === 0}
-          onClick={handleOrder}
+          onClick={() => navigate("/order")}
         >
           Đặt hàng
         </Button>
@@ -179,7 +243,11 @@ const CartDrawer = () => {
           icon={<MdCancel />}
           style={{ flex: 1, marginLeft: 8 }}
           disabled={productData.length === 0}
-          onClick={handleRemoveAll}
+          onClick={() => {
+            if (cart?.userId) {
+              dispatch(deleteCart({ id: cart._id || "" }));
+            }
+          }}
         >
           Xóa giỏ hàng
         </Button>

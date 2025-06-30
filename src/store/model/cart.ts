@@ -1,4 +1,5 @@
 export interface ItemCartInteface {
+    _id: string;
     itemType: "Pet" | "Food" | "Accessory";
     itemId: string;
     quantity: number;

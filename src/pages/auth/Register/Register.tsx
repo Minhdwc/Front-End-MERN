@@ -43,7 +43,7 @@ export default function Register() {
             Accept: "application/json",
             "Content-Type": "multipart/form-data",
           },
-          transformRequest: [(data: any) => data], // Prevent axios from transforming FormData
+          transformRequest: [(data: any) => data],
         }
       );
 
@@ -160,7 +160,6 @@ export default function Register() {
                   fullWidth
                   size="large"
                   variant="contained"
-                  // disabled={loadingAction}
                   sx={{
                     backgroundColor: "#FF7043",
                     color: "#fff",

@@ -65,19 +65,7 @@ export default function DetailRegister() {
       <Form.Item
         label="Ngày sinh"
         name="dateOfBirth"
-        rules={[
-          { required: false, message: "Vui lòng nhập ngày sinh!" },
-          {
-            validator: (_, value) => {
-              if (!value) return Promise.resolve();
-              // const age = dayjs().diff(dayjs(value), "year");
-              // if (age < 18) {
-              //   return Promise.reject("Bạn phải đủ 18 tuổi để đăng ký!");
-              // }
-              return Promise.resolve();
-            },
-          },
-        ]}
+        rules={[{ required: false, message: "Vui lòng nhập ngày sinh!" }]}
         className="mb-4"
       >
         <DatePicker

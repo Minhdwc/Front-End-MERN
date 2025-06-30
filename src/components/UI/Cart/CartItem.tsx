@@ -1,44 +1,52 @@
-import { useEffect, useState } from "react";
+import * as React from "react";
 import { Box, Typography, IconButton } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/Remove";
 import DeleteIcon from "@mui/icons-material/Delete";
+import { useDispatch } from "react-redux";
+import {
+  increaseQuantity,
+  decreaseQuantity,
+  deleteItemInCart,
+  getCartByUserId,
+} from "@/store/services/cart/cartSlice";
+import { AppDispatch } from "@/store/store";
 
-interface CartItemProps {
+export interface CartItemProps {
   id: string;
   imageUrl: string;
+  idItem: string;
   name: string;
   price: number;
-  initialQuantity: number;
-  check: boolean;
-  onQuantityChange: (newQuantity: number) => void;
-  onDelete: () => void;
+  userId: string;
+  itemType: "Pet" | "Food" | "Accessory";
+  onUpdate?: () => void;
+  quantity: number;
+  onIncrease: (itemId: string) => void;
+  onDecrease: (itemId: string) => void;
 }
 
 const CartItem = ({
+  id,
+  idItem,
   imageUrl,
   name,
   price,
-  initialQuantity,
-  onQuantityChange,
-  onDelete,
+  userId,
+  itemType,
+  onUpdate,
+  quantity,
+  onIncrease,
+  onDecrease,
 }: CartItemProps) => {
-  const [quantity, setQuantity] = useState(initialQuantity);
-  useEffect(() => {
-    setQuantity(initialQuantity);
-  }, [initialQuantity]);
+  const dispatch = useDispatch<AppDispatch>();
 
-  const handleIncrease = () => {
-    const newQuantity = quantity + 1;
-    setQuantity(newQuantity);
-    onQuantityChange(newQuantity);
-  };
-
-  const handleDecrease = () => {
-    if (quantity > 1) {
-      const newQuantity = quantity - 1;
-      setQuantity(newQuantity);
-      onQuantityChange(newQuantity);
+  const handleDelete = async () => {
+    try {
+      await dispatch(deleteItemInCart({ userId, id, itemType })).unwrap();
+      onUpdate?.();
+    } catch (error) {
+      console.error("Delete Error:", error);
     }
   };
 
@@ -52,14 +60,10 @@ const CartItem = ({
       sx={{
         backgroundColor: "#fafafa",
         borderRadius: "8px",
+        mb: 2,
       }}
     >
-      <Box
-        display="flex"
-        alignItems="center"
-        justifyContent="flex-start"
-        sx={{ flex: 1 }}
-      >
+      <Box display="flex" alignItems="center" sx={{ flex: 1 }}>
         <img
           src={imageUrl}
           alt={name}
@@ -80,22 +84,26 @@ const CartItem = ({
         display="flex"
         flexDirection="column"
         alignItems="flex-end"
-        sx={{ textAlign: "right", flex: 1 }}
+        sx={{ flex: 1 }}
       >
         <Typography variant="h6" sx={{ fontWeight: 500 }}>
           ${price * quantity}
         </Typography>
         <Box display="flex" alignItems="center" mt={1}>
-          <IconButton onClick={handleDecrease} sx={{ padding: 0 }}>
+          <IconButton
+            onClick={() => onDecrease(idItem)}
+            sx={{ padding: 0 }}
+            disabled={quantity <= 1}
+          >
             <RemoveIcon />
           </IconButton>
           <Typography variant="body1" mx={2}>
             {quantity}
           </Typography>
-          <IconButton onClick={handleIncrease} sx={{ padding: 0 }}>
+          <IconButton onClick={() => onIncrease(idItem)} sx={{ padding: 0 }}>
             <AddIcon />
           </IconButton>
-          <IconButton onClick={onDelete} sx={{ padding: 0, ml: 2 }}>
+          <IconButton onClick={handleDelete} sx={{ padding: 0, ml: 2 }}>
             <DeleteIcon />
           </IconButton>
         </Box>
@@ -104,4 +112,4 @@ const CartItem = ({
   );
 };
 
-export default CartItem;
+export default React.memo(CartItem);

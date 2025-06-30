@@ -22,9 +22,7 @@ export const getCartByUserId = createAsyncThunk<CartInterface, string>(
   "cart/fetch",
   async (userId, { rejectWithValue }) => {
     try {
-      const response = await authorizedAxiosInstance.get(
-        `/cart/get/c=${userId}`
-      );
+      const response = await authorizedAxiosInstance.get(`/cart/get/c=${userId}`);
       const userCart = response.data?.data?.[0] as CartInterface;
       if (!userCart) throw new Error("Cart not found");
       return userCart;
@@ -42,86 +40,75 @@ export const addItemToCart = createAsyncThunk<
     food?: FoodInterface;
     accessory?: AccessoryInterface;
   }
->(
-  "cart/addItemToCart",
-  async ({ userId, pet, food, accessory }, { rejectWithValue }) => {
-    try {
-      const res = await authorizedAxiosInstance.get(`/cart/get/c=${userId}`);
-      const userCart = res.data?.data?.[0] as CartInterface;
+>("cart/addItemToCart", async ({ userId, pet, food, accessory }, { rejectWithValue }) => {
+  try {
+    const res = await authorizedAxiosInstance.get(`/cart/get/c=${userId}`);
+    const userCart = res.data?.data?.[0] as CartInterface;
 
-      let cartItemUpdate: ItemCartInteface[] = userCart?.item
-        ? [...userCart.item]
-        : [];
+    let cartItemUpdate: ItemCartInteface[] = userCart?.item ? [...userCart.item] : [];
 
-      const pushItem = (
-        type: "Pet" | "Food" | "Accessory",
-        data: { _id?: string; price?: number }
-      ) => {
-        if (!data._id || data.price === undefined) {
-          throw new Error(`${type} item missing _id or price`);
-        }
-
-        const index = cartItemUpdate.findIndex(
-          (item) =>
-            item.itemType === type &&
-            item.itemId?.toString() === data._id?.toString()
-        );
-
-        if (index > -1) {
-          cartItemUpdate[index].quantity += 1;
-          cartItemUpdate[index].totalPrice += data.price;
-        } else {
-          cartItemUpdate.push({
-            itemType: type,
-            itemId: data._id,
-            quantity: 1,
-            price: data.price,
-            totalPrice: data.price,
-          });
-        }
-      };
-
-      if (pet) {
-        pushItem("Pet", pet);
-      } else if (food) {
-        pushItem("Food", food);
-      } else if (accessory) {
-        pushItem("Accessory", accessory);
-      } else {
-        throw new Error("No valid item to add");
+    const pushItem = (
+      type: "Pet" | "Food" | "Accessory",
+      data: { _id?: string; price?: number }
+    ) => {
+      if (!data._id || data.price === undefined) {
+        throw new Error(`${type} item missing _id or price`);
       }
 
-      const payload = { item: cartItemUpdate };
+      const index = cartItemUpdate.findIndex(
+        (item) => item.itemType === type && item.itemId?.toString() === data._id?.toString()
+      );
 
-      if (userCart && userCart._id) {
-        const response = await authorizedAxiosInstance.post(
-          `/cart/update/u=${userId}`,
-          payload
-        );
-        return response.data as CartInterface;
+      if (index > -1) {
+        cartItemUpdate[index].quantity += 1;
+        cartItemUpdate[index].totalPrice += data.price;
       } else {
-        const createResponse = await authorizedAxiosInstance.post(
-          "/cart/create",
-          { ...payload, userId }
-        );
-        return createResponse.data as CartInterface;
+        cartItemUpdate.push({
+          _id: data._id,
+          itemType: type,
+          itemId: data._id,
+          quantity: 1,
+          price: data.price,
+          totalPrice: data.price,
+        });
       }
-    } catch (err: any) {
-      return rejectWithValue("Failed to add item to cart");
+    };
+
+    if (pet) {
+      pushItem("Pet", pet);
+    } else if (food) {
+      pushItem("Food", food);
+    } else if (accessory) {
+      pushItem("Accessory", accessory);
+    } else {
+      throw new Error("No valid item to add");
     }
+
+    const payload = { item: cartItemUpdate };
+
+    if (userCart && userCart._id) {
+      const response = await authorizedAxiosInstance.post(`/cart/update/u=${userId}`, payload);
+      return response.data.data as CartInterface;
+    } else {
+      const createResponse = await authorizedAxiosInstance.post("/cart/create", {
+        ...payload,
+        userId,
+      });
+      return createResponse.data.data as CartInterface;
+    }
+  } catch (err: any) {
+    return rejectWithValue("Failed to add item to cart");
   }
-);
+});
 
 export const deleteCart = createAsyncThunk<CartInterface, { id: string }>(
   "cart/delete",
   async ({ id }, { rejectWithValue }) => {
     try {
-      const response = await authorizedAxiosInstance.delete(
-        `/cart/delete/d=${id}`
-      );
+      const response = await authorizedAxiosInstance.delete(`/cart/delete/d=${id}`);
       if (response.data?.status === "Deleted") {
         persistor.purge();
-        return response.data?.cart as CartInterface;
+        return response.data.cart as CartInterface;
       }
       throw new Error("Failed to delete cart");
     } catch (error: any) {
@@ -133,17 +120,15 @@ export const deleteCart = createAsyncThunk<CartInterface, { id: string }>(
 
 export const increaseQuantity = createAsyncThunk<
   CartInterface,
-  { userId: string; id: string; itemType: "Pet" | "Food" | "Accessory" }
->("cart/increase", async ({ userId, id, itemType }, { rejectWithValue }) => {
+  { userId: string; idItem: string; itemType: "Pet" | "Food" | "Accessory" }
+>("cart/increase", async ({ userId, idItem, itemType }, { rejectWithValue }) => {
   try {
     const res = await authorizedAxiosInstance.get(`/cart/get/c=${userId}`);
     const userCart = res.data?.data?.[0] as CartInterface;
     if (!userCart) throw new Error("Cart not found");
 
     const updatedItems = userCart.item.map((item) => {
-      const match =
-        item.itemType === itemType && item.itemId?.toString() === id;
-      if (match) {
+      if (item.itemType === itemType && item._id === idItem) {
         return {
           ...item,
           quantity: item.quantity + 1,
@@ -153,11 +138,11 @@ export const increaseQuantity = createAsyncThunk<
       return item;
     });
 
-    const response = await authorizedAxiosInstance.post(
-      `/cart/update/u=${userId}`,
-      { item: updatedItems }
-    );
-    return response.data as CartInterface;
+    const response = await authorizedAxiosInstance.post(`/cart/update/u=${userId}`, {
+      item: updatedItems,
+    });
+
+    return response.data.data as CartInterface;
   } catch (err: any) {
     return rejectWithValue("Failed to increase quantity");
   }
@@ -165,17 +150,15 @@ export const increaseQuantity = createAsyncThunk<
 
 export const decreaseQuantity = createAsyncThunk<
   CartInterface,
-  { userId: string; id: string; itemType: "Pet" | "Food" | "Accessory" }
->("cart/decrease", async ({ userId, id, itemType }, { rejectWithValue }) => {
+  { userId: string; idItem: string; itemType: "Pet" | "Food" | "Accessory" }
+>("cart/decrease", async ({ userId, idItem, itemType }, { rejectWithValue }) => {
   try {
     const res = await authorizedAxiosInstance.get(`/cart/get/c=${userId}`);
     const userCart = res.data?.data?.[0] as CartInterface;
     if (!userCart) throw new Error("Cart not found");
 
     const updatedItems = userCart.item.map((item) => {
-      const match =
-        item.itemType === itemType && item.itemId?.toString() === id;
-      if (match && item.quantity > 1) {
+      if (item.itemType === itemType && item._id === idItem && item.quantity > 1) {
         return {
           ...item,
           quantity: item.quantity - 1,
@@ -185,11 +168,11 @@ export const decreaseQuantity = createAsyncThunk<
       return item;
     });
 
-    const response = await authorizedAxiosInstance.post(
-      `/cart/update/u=${userId}`,
-      { item: updatedItems }
-    );
-    return response.data as CartInterface;
+    const response = await authorizedAxiosInstance.post(`/cart/update/u=${userId}`, {
+      item: updatedItems,
+    });
+
+    return response.data.data as CartInterface;
   } catch (err: any) {
     return rejectWithValue("Failed to decrease quantity");
   }
@@ -205,14 +188,14 @@ export const deleteItemInCart = createAsyncThunk<
     if (!userCart) throw new Error("Cart not found");
 
     const updatedItems = userCart.item.filter(
-      (item) => item.itemType !== itemType || item.itemId?.toString() !== id
+      (item) => !(item.itemType === itemType && item.itemId === id)
     );
 
-    const response = await authorizedAxiosInstance.post(
-      `/cart/update/u=${userId}`,
-      { item: updatedItems }
-    );
-    return response.data as CartInterface;
+    const response = await authorizedAxiosInstance.post(`/cart/update/u=${userId}`, {
+      item: updatedItems,
+    });
+
+    return response.data.data as CartInterface;
   } catch (err: any) {
     return rejectWithValue("Failed to delete item");
   }
@@ -232,6 +215,7 @@ const cartSlice = createSlice({
     builder
       .addCase(getCartByUserId.pending, (state) => {
         state.loading = true;
+        state.error = null;
       })
       .addCase(getCartByUserId.fulfilled, (state, action) => {
         state.loading = false;
@@ -245,10 +229,11 @@ const cartSlice = createSlice({
 
       .addCase(addItemToCart.pending, (state) => {
         state.loading = true;
+        state.error = null;
       })
       .addCase(addItemToCart.fulfilled, (state, action) => {
         state.loading = false;
-        state.cart = action.payload || { item: [], userId: "" };
+        state.cart = action.payload;
         state.error = null;
       })
       .addCase(addItemToCart.rejected, (state, action) => {
@@ -257,17 +242,54 @@ const cartSlice = createSlice({
       })
 
       .addCase(increaseQuantity.fulfilled, (state, action) => {
+        state.loading = false;
         state.cart = action.payload;
+        state.error = null;
       })
+      .addCase(increaseQuantity.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(increaseQuantity.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      })
+
       .addCase(decreaseQuantity.fulfilled, (state, action) => {
+        state.loading = false;
         state.cart = action.payload;
+        state.error = null;
       })
+      .addCase(decreaseQuantity.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(decreaseQuantity.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      })
+
       .addCase(deleteItemInCart.fulfilled, (state, action) => {
+        state.loading = false;
         state.cart = action.payload;
+        state.error = null;
       })
+      .addCase(deleteItemInCart.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(deleteItemInCart.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      })
+
       .addCase(deleteCart.fulfilled, (state) => {
         state.cart = null;
         state.loading = false;
+        state.error = null;
+      })
+      .addCase(deleteCart.pending, (state) => {
+        state.loading = true;
         state.error = null;
       })
       .addCase(deleteCart.rejected, (state, action) => {
