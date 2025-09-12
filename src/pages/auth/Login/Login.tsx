@@ -24,9 +24,13 @@ import {
 } from "@/store/services/cart/cartSlice";
 import { PetInterface } from "@/store/model/pet";
 
-interface LoginResponse {
-  accessToken: string;
-  user: UserInterface;
+interface LoginApiResponse {
+  data: {
+    userLogged: {
+      accessToken: string;
+      user?: UserInterface;
+    };
+  };
 }
 
 const Login = () => {
@@ -40,7 +44,7 @@ const Login = () => {
   const onFinish = async (values: { email: string; password: string }) => {
     setLoadingAction(true);
     try {
-      const response = await authorizedAxiosInstance.post<LoginResponse>(
+      const response = await authorizedAxiosInstance.post<LoginApiResponse>(
         "auth/login",
         values
       );

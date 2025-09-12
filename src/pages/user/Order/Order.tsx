@@ -53,8 +53,8 @@ const fetchDataProduct = async (id: string, type: string) => {
     if (type === "Pet") url = `/pet/get/d=${id}`;
     else if (type === "Accessory") url = `/accessory/get/d=${id}`;
     else url = `/food/get/d=${id}`;
-    const response = await authorizedAxiosInstance.get(url);
-    return response.data?.data || {};
+    const response = await authorizedAxiosInstance.get<{ data: Record<string, any> }>(url);
+    return (response as any).data?.data || {};
   } catch (error) {
     console.error("Failed to fetch product:", error);
     return {};

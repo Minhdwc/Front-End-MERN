@@ -22,8 +22,8 @@ export const getCartByUserId = createAsyncThunk<CartInterface, string>(
   "cart/fetch",
   async (userId, { rejectWithValue }) => {
     try {
-      const response = await authorizedAxiosInstance.get(`/cart/get/c=${userId}`);
-      const userCart = response.data?.data?.[0] as CartInterface;
+      const response = await authorizedAxiosInstance.get<{ data: CartInterface[] }>(`/cart/get/c=${userId}`);
+      const userCart = (response as any).data?.data?.[0] as CartInterface;
       if (!userCart) throw new Error("Cart not found");
       return userCart;
     } catch {
@@ -42,8 +42,8 @@ export const addItemToCart = createAsyncThunk<
   }
 >("cart/addItemToCart", async ({ userId, pet, food, accessory }, { rejectWithValue }) => {
   try {
-    const res = await authorizedAxiosInstance.get(`/cart/get/c=${userId}`);
-    const userCart = res.data?.data?.[0] as CartInterface;
+    const res = await authorizedAxiosInstance.get<{ data: CartInterface[] }>(`/cart/get/c=${userId}`);
+    const userCart = (res as any).data?.data?.[0] as CartInterface;
 
     let cartItemUpdate: ItemCartInteface[] = userCart?.item ? [...userCart.item] : [];
 
@@ -87,14 +87,14 @@ export const addItemToCart = createAsyncThunk<
     const payload = { item: cartItemUpdate };
 
     if (userCart && userCart._id) {
-      const response = await authorizedAxiosInstance.post(`/cart/update/u=${userId}`, payload);
-      return response.data.data as CartInterface;
+      const response = await authorizedAxiosInstance.post<{ data: CartInterface }>(`/cart/update/u=${userId}`, payload);
+      return (response as any).data.data as CartInterface;
     } else {
-      const createResponse = await authorizedAxiosInstance.post("/cart/create", {
+      const createResponse = await authorizedAxiosInstance.post<{ data: CartInterface }>("/cart/create", {
         ...payload,
         userId,
       });
-      return createResponse.data.data as CartInterface;
+      return (createResponse as any).data.data as CartInterface;
     }
   } catch (err: any) {
     return rejectWithValue("Failed to add item to cart");
@@ -105,10 +105,10 @@ export const deleteCart = createAsyncThunk<CartInterface, { id: string }>(
   "cart/delete",
   async ({ id }, { rejectWithValue }) => {
     try {
-      const response = await authorizedAxiosInstance.delete(`/cart/delete/d=${id}`);
-      if (response.data?.status === "Deleted") {
+      const response = await authorizedAxiosInstance.delete<{ status: string; cart: CartInterface }>(`/cart/delete/d=${id}`);
+      if ((response as any).data?.status === "Deleted") {
         persistor.purge();
-        return response.data.cart as CartInterface;
+        return (response as any).data.cart as CartInterface;
       }
       throw new Error("Failed to delete cart");
     } catch (error: any) {
@@ -123,8 +123,8 @@ export const increaseQuantity = createAsyncThunk<
   { userId: string; idItem: string; itemType: "Pet" | "Food" | "Accessory" }
 >("cart/increase", async ({ userId, idItem, itemType }, { rejectWithValue }) => {
   try {
-    const res = await authorizedAxiosInstance.get(`/cart/get/c=${userId}`);
-    const userCart = res.data?.data?.[0] as CartInterface;
+    const res = await authorizedAxiosInstance.get<{ data: CartInterface[] }>(`/cart/get/c=${userId}`);
+    const userCart = (res as any).data?.data?.[0] as CartInterface;
     if (!userCart) throw new Error("Cart not found");
 
     const updatedItems = userCart.item.map((item) => {
@@ -138,11 +138,11 @@ export const increaseQuantity = createAsyncThunk<
       return item;
     });
 
-    const response = await authorizedAxiosInstance.post(`/cart/update/u=${userId}`, {
+    const response = await authorizedAxiosInstance.post<{ data: CartInterface }>(`/cart/update/u=${userId}`, {
       item: updatedItems,
     });
 
-    return response.data.data as CartInterface;
+    return (response as any).data.data as CartInterface;
   } catch (err: any) {
     return rejectWithValue("Failed to increase quantity");
   }
@@ -153,8 +153,8 @@ export const decreaseQuantity = createAsyncThunk<
   { userId: string; idItem: string; itemType: "Pet" | "Food" | "Accessory" }
 >("cart/decrease", async ({ userId, idItem, itemType }, { rejectWithValue }) => {
   try {
-    const res = await authorizedAxiosInstance.get(`/cart/get/c=${userId}`);
-    const userCart = res.data?.data?.[0] as CartInterface;
+    const res = await authorizedAxiosInstance.get<{ data: CartInterface[] }>(`/cart/get/c=${userId}`);
+    const userCart = (res as any).data?.data?.[0] as CartInterface;
     if (!userCart) throw new Error("Cart not found");
 
     const updatedItems = userCart.item.map((item) => {
@@ -168,11 +168,11 @@ export const decreaseQuantity = createAsyncThunk<
       return item;
     });
 
-    const response = await authorizedAxiosInstance.post(`/cart/update/u=${userId}`, {
+    const response = await authorizedAxiosInstance.post<{ data: CartInterface }>(`/cart/update/u=${userId}`, {
       item: updatedItems,
     });
 
-    return response.data.data as CartInterface;
+    return (response as any).data.data as CartInterface;
   } catch (err: any) {
     return rejectWithValue("Failed to decrease quantity");
   }
@@ -183,19 +183,19 @@ export const deleteItemInCart = createAsyncThunk<
   { userId: string; id: string; itemType: "Pet" | "Food" | "Accessory" }
 >("cart/deleteItem", async ({ userId, id, itemType }, { rejectWithValue }) => {
   try {
-    const res = await authorizedAxiosInstance.get(`/cart/get/c=${userId}`);
-    const userCart = res.data?.data?.[0] as CartInterface;
+    const res = await authorizedAxiosInstance.get<{ data: CartInterface[] }>(`/cart/get/c=${userId}`);
+    const userCart = (res as any).data?.data?.[0] as CartInterface;
     if (!userCart) throw new Error("Cart not found");
 
     const updatedItems = userCart.item.filter(
       (item) => !(item.itemType === itemType && item.itemId === id)
     );
 
-    const response = await authorizedAxiosInstance.post(`/cart/update/u=${userId}`, {
+    const response = await authorizedAxiosInstance.post<{ data: CartInterface }>(`/cart/update/u=${userId}`, {
       item: updatedItems,
     });
 
-    return response.data.data as CartInterface;
+    return (response as any).data.data as CartInterface;
   } catch (err: any) {
     return rejectWithValue("Failed to delete item");
   }

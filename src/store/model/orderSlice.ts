@@ -24,33 +24,36 @@ const initialState: OrderState = {
   error: null,
 };
 
-export const fetchOrderFromCart = createAsyncThunk(
-  "order/fetchFromCart",
-  async (_, { rejectWithValue }) => {
-    try {
-      const response = await axios.get("/api/order/from-cart");
-      return response.data;
-    } catch (error: any) {
-      return rejectWithValue(
-        error.response?.data?.message || "Failed to fetch order data"
-      );
-    }
+export const fetchOrderFromCart = createAsyncThunk<
+  { items: CartItem[]; totalAmount: number },
+  void,
+  { rejectValue: string }
+>("order/fetchFromCart", async (_, { rejectWithValue }) => {
+  try {
+    const response = await axios.get("/api/order/from-cart");
+    const payload = response.data as { items: CartItem[]; totalAmount: number };
+    return payload;
+  } catch (error: any) {
+    return rejectWithValue(
+      error.response?.data?.message || "Failed to fetch order data"
+    );
   }
-);
+});
 
-export const createOrder = createAsyncThunk(
-  "order/create",
-  async (_, { rejectWithValue }) => {
-    try {
-      const response = await axios.post("/api/order/create");
-      return response.data;
-    } catch (error: any) {
-      return rejectWithValue(
-        error.response?.data?.message || "Failed to create order"
-      );
-    }
+export const createOrder = createAsyncThunk<
+  void,
+  void,
+  { rejectValue: string }
+>("order/create", async (_, { rejectWithValue }) => {
+  try {
+    await axios.post("/api/order/create");
+    return;
+  } catch (error: any) {
+    return rejectWithValue(
+      error.response?.data?.message || "Failed to create order"
+    );
   }
-);
+});
 
 const orderSlice = createSlice({
   name: "order",
