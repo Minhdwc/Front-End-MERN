@@ -50,8 +50,8 @@ export default function AddressModal({
           >
             <RecenterMap lat={selected.lat} lon={selected.lon} />
             <TileLayer
-              attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a>'
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a>'
             />
             <Marker position={[selected.lat, selected.lon]}>
               <Popup>Địa chỉ bạn đã chọn</Popup>

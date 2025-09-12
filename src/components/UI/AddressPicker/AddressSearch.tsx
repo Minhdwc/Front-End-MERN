@@ -24,7 +24,7 @@ export default function AddressSearch({
           placeholder="Nhập địa chỉ"
           className="flex-1 px-3 py-2 border border-gray-300 rounded shadow-sm focus:ring focus:ring-blue-200"
           value={search}
-          onChange={(e) => onChange(e.target.value)}
+          onChange={(e) => onChange(e.currentTarget.value)}
         />
         <button
           onClick={onManualSearch}

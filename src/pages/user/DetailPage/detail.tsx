@@ -9,17 +9,17 @@ const Detail = () => {
 
   const fetchDetail = async () => {
     try {
-      let res;
+      let res: { data: { data: any } };
       if (param.id?.startsWith("pet_")) {
-        res = await authorizedAxiosInstance.get(
+        res = await authorizedAxiosInstance.get<{ data: any }>(
           `/pet/get/d=${param.id.replace("pet_", "")}`
         );
       } else {
-        res = await authorizedAxiosInstance.get(
+        res = await authorizedAxiosInstance.get<{ data: any }>(
           `/product/get/d=${param.id?.replace("product_", "")}`
         );
       }
-      setDetailData(res.data.data);
+      setDetailData((res as any).data?.data ?? null);
     } catch (error) {
       console.error("Failed to fetch detail:", error);
     }
